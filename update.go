@@ -62,6 +62,9 @@ func updateMac(absXlsm string) {
 }
 
 func updateWin(absXlsm string) {
+	absDir := filepath.Dir(absXlsm)
+	modulesDir := absDir + "\\modules\\"
+
 	vbs := `Set excel = CreateObject("Excel.Application")
 excel.Visible = True
 excel.DisplayAlerts = False
@@ -109,7 +112,7 @@ If Not hasInstaller Then
 End If
 
 On Error Resume Next
-excel.Run "InstallModules"
+excel.Run "InstallModules", "` + modulesDir + `"
 errNum = Err.Number
 On Error GoTo 0
 
