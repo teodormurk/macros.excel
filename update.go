@@ -5,8 +5,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"runtime"
-	"strings"
 )
 
 const (
@@ -27,43 +25,10 @@ func main() {
 	}
 
 	fmt.Printf("Updating %s ...\n", xlsmName)
-	fmt.Println(strings.Repeat("=", 40))
 
 	absXlsm, _ := filepath.Abs(xlsmPath)
-
-	switch runtime.GOOS {
-	case "darwin":
-		updateMac(absXlsm)
-	case "windows":
-		updateWin(absXlsm)
-	default:
-		fatal("unsupported platform")
-	}
-}
-
-func updateMac(absXlsm string) {
-	fmt.Println("Opening workbook ...")
-	exec.Command("osascript", "-e",
-		fmt.Sprintf(`tell application "Microsoft Excel" to open POSIX file "%s"`, absXlsm),
-	).Run()
-	fmt.Println("Waiting 3s ...")
-	exec.Command("osascript", "-e", "delay 3").Run()
-
-	out, err := exec.Command("osascript", "-e",
-		`tell application "Microsoft Excel" to run VBMacro "InstallModules"`).CombinedOutput()
-	if err != nil {
-		fmt.Println(string(out))
-		fmt.Println()
-		fmt.Println("Installer not found. Import Installer.bas once:")
-		fmt.Println("  Alt+F11 -> right-click -> Import File -> modules/Installer.bas")
-		return
-	}
-	fmt.Println("Done!")
-}
-
-func updateWin(absXlsm string) {
 	absDir := filepath.Dir(absXlsm)
-	modulesDir := absDir + "\\modules\\"
+	modAbsDir := absDir + "\\modules"
 
 	vbs := `Set excel = CreateObject("Excel.Application")
 excel.Visible = True
@@ -72,7 +37,6 @@ excel.DisplayAlerts = False
 Set fso = CreateObject("Scripting.FileSystemObject")
 Set f = fso.GetFile("` + absXlsm + `")
 shortPath = f.ShortPath
-
 Set wb = excel.Workbooks.Open(shortPath)
 
 On Error Resume Next
@@ -82,55 +46,69 @@ On Error GoTo 0
 
 If errNum <> 0 Then
     MsgBox "VBA project access denied." & vbCrLf & vbCrLf & _
-           "Excel -> File -> Options -> Trust Center -> Trust Center Settings" & vbCrLf & _
-           "-> Macro Settings -> check [x] Trust access to the VBA project object model" & vbCrLf & _
-           "Then run update again.", vbExclamation, "Update"
-    wb.Close False
-    excel.Quit
-    WScript.Quit 1
-End If
-
-hasInstaller = False
-For Each comp In vb.VBComponents
-    If comp.Name = "Installer" Then
-        hasInstaller = True
-        Exit For
-    End If
-Next
-
-If Not hasInstaller Then
-    MsgBox "Installer.bas not found in workbook." & vbCrLf & vbCrLf & _
-           "Import it once:" & vbCrLf & _
-           "1. Alt+F11 (open VBA editor)" & vbCrLf & _
-           "2. Right-click VBAProject -> Import File" & vbCrLf & _
-           "3. Select modules\Installer.bas" & vbCrLf & _
-           "4. Ctrl+S to save" & vbCrLf & _
-           "5. Run update.exe again", vbExclamation, "Update"
+           "Excel -> Options -> Trust Center -> Macro Settings" & vbCrLf & _
+           "Check [x] Trust access to the VBA project object model", vbExclamation, "Error"
     wb.Close False
     excel.Quit
     WScript.Quit 1
 End If
 
 On Error Resume Next
-excel.Run "InstallModules", "` + modulesDir + `"
-errNum = Err.Number
+vb.VBComponents.Remove vb.VBComponents("ModSubstCore")
+vb.VBComponents.Remove vb.VBComponents("ModSubstUtils")
+vb.VBComponents.Remove vb.VBComponents("ModSubstUI")
 On Error GoTo 0
 
-If errNum <> 0 Then
-    MsgBox "InstallModules error. Check VBA editor for details.", vbExclamation, "Error"
-Else
-    MsgBox "Done!", vbInformation, "Update"
+On Error Resume Next
+vb.VBComponents.Import "` + modAbsDir + `\ModSubstCore.bas"
+vb.VBComponents.Import "` + modAbsDir + `\ModSubstUtils.bas"
+vb.VBComponents.Import "` + modAbsDir + `\ModSubstUI.bas"
+importErr = Err.Number
+On Error GoTo 0
+
+If importErr <> 0 Then
+    MsgBox "Failed to import modules. Check modules/ files exist.", vbExclamation, "Error"
+    wb.Close False
+    excel.Quit
+    WScript.Quit 1
+End If
+
+twPath = "` + modAbsDir + `\ThisWorkbook.cls"
+If fso.FileExists(twPath) Then
+    Set cm = vb.VBComponents("ThisWorkbook").CodeModule
+    cm.DeleteLines 1, cm.CountOfLines
+    fnum = FreeFile
+    Open twPath For Input As fnum
+    started = False
+    Do Until EOF(fnum)
+        Line Input #fnum, line
+        If Not started Then
+            If Left(Trim(line), 10) = "Attribute " Then
+                started = True
+            End If
+        End If
+        If started Then
+            lineNum = lineNum + 1
+            cm.InsertLines lineNum, line
+        End If
+    Loop
+    Close fnum
 End If
 
 wb.Save
 wb.Close
-excel.Quit`
+excel.Quit
+WScript.Quit 0`
 
 	tmp := filepath.Join(os.TempDir(), "update_macros.vbs")
 	os.WriteFile(tmp, utf8ToWin1251([]byte(vbs)), 0644)
 	defer os.Remove(tmp)
 
-	exec.Command("cscript", "//nologo", tmp).Run()
+	out, err := exec.Command("cscript", "//nologo", tmp).CombinedOutput()
+	fmt.Print(string(out))
+	if err != nil {
+		fatal("cscript failed: %s", err)
+	}
 }
 
 func utf8ToWin1251(data []byte) []byte {
