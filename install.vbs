@@ -6,6 +6,16 @@ Set fso = CreateObject("Scripting.FileSystemObject")
 logPath = fso.GetParentFolderName(WScript.ScriptFullName) & "\install_log.txt"
 Set logFile = fso.CreateTextFile(logPath, True, True)
 
+Function ReadFile1251(path)
+    Set stream = CreateObject("ADODB.Stream")
+    stream.Type = 2
+    stream.Charset = "windows-1251"
+    stream.Open
+    stream.LoadFromFile path
+    ReadFile1251 = stream.ReadText
+    stream.Close
+End Function
+
 logFile.WriteLine "=== Install Log ==="
 
 Set wb = excel.Workbooks.Open(excel.GetOpenFilename("Excel Files (*.xlsm),*.xlsm", , "Open workbook"))
@@ -43,11 +53,19 @@ For i = 0 To UBound(basFiles)
         logFile.WriteLine "FILE NOT FOUND"
     Else
         On Error Resume Next
-        Set f = fso.OpenTextFile(filePath, 1)
-        code = f.ReadAll
-        f.Close
+        code = ReadFile1251(filePath)
+        errNum = Err.Number
+        On Error GoTo 0
+
+        If errNum <> 0 Then
+            logFile.WriteLine "Read ERROR " & errNum & " (ADODB not available, using FSO)"
+            Set f2 = fso.OpenTextFile(filePath, 1, False, -1)
+            code = f2.ReadAll
+            f2.Close
+        End If
 
         modName = Replace(basFiles(i), ".bas", "")
+        On Error Resume Next
         vb.VBComponents.Remove vb.VBComponents(modName)
         Err.Clear
 
@@ -69,23 +87,29 @@ clsPath = scriptDir & "\modules\AppEvents.cls"
 logFile.Write "Import AppEvents.cls: "
 If fso.FileExists(clsPath) Then
     On Error Resume Next
+    code = ReadFile1251(clsPath)
+    errNum = Err.Number
+    On Error GoTo 0
+    If errNum <> 0 Then
+        Set f2 = fso.OpenTextFile(clsPath, 1, False, -1)
+        code = f2.ReadAll
+        f2.Close
+    End If
+
+    On Error Resume Next
     vb.VBComponents.Remove vb.VBComponents("AppEvents")
     Err.Clear
 
-    Set f = fso.OpenTextFile(clsPath, 1)
-    code = f.ReadAll
-    f.Close
-
-    Set cls = vb.VBComponents.Add(2)
-    cls.Name = "AppEvents"
-    cls.CodeModule.AddFromString code
+    Set cls2 = vb.VBComponents.Add(2)
+    cls2.Name = "AppEvents"
+    cls2.CodeModule.AddFromString code
     errNum = Err.Number
     On Error GoTo 0
 
     If errNum <> 0 Then
         logFile.WriteLine "ERROR " & errNum
     Else
-        logFile.WriteLine "OK (lines=" & cls.CodeModule.CountOfLines & ")"
+        logFile.WriteLine "OK (lines=" & cls2.CodeModule.CountOfLines & ")"
     End If
 Else
     logFile.WriteLine "FILE NOT FOUND"
@@ -95,17 +119,22 @@ twPath = scriptDir & "\modules\ThisWorkbook.cls"
 If fso.FileExists(twPath) Then
     logFile.Write "Update ThisWorkbook: "
     On Error Resume Next
+    code = ReadFile1251(twPath)
+    errNum = Err.Number
+    On Error GoTo 0
+    If errNum <> 0 Then
+        Set f2 = fso.OpenTextFile(twPath, 1, False, -1)
+        code = f2.ReadAll
+        f2.Close
+    End If
+
     Set cm = vb.VBComponents("ThisWorkbook").CodeModule
     cm.DeleteLines 1, cm.CountOfLines
     Err.Clear
 
-    Set f = fso.OpenTextFile(twPath, 1)
-    code = f.ReadAll
-    f.Close
-
-    started = False
-    outCode = ""
     lines = Split(code, vbCrLf)
+    started = False
+    lineNum = 0
     For li = 0 To UBound(lines)
         line = lines(li)
         If Not started Then
