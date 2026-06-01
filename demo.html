@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Подстановка — полные примеры</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Tahoma,sans-serif;background:#f0f2f5;color:#222;padding:32px;max-width:1400px;margin:0 auto}
+h1{font-size:22px;margin-bottom:6px}
+.subtitle{color:#666;margin-bottom:28px;font-size:13px}
+
+.rules{background:#fff;border-radius:8px;padding:20px;margin-bottom:28px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.rules h2{font-size:15px;margin-bottom:12px;color:#333}
+.rules ul{list-style:none;padding:0}
+.rules li{padding:6px 0 6px 28px;position:relative;font-size:13px;color:#444;border-bottom:1px solid #f0f0f0}
+.rules li:last-child{border:none}
+.rules li::before{position:absolute;left:0;top:7px;width:18px;height:18px;border-radius:50%;text-align:center;font-size:11px;line-height:18px;color:#fff;font-weight:700}
+.r1::before{background:#e74c3c;content:"!"}
+.r2::before{background:#95a5a6;content:"\d7"}
+.r3::before{background:#3498db;content:"#"}
+.r4::before{background:#9b59b6;content:"+"}
+.r5::before{background:#2ecc71;content:"K"}
+
+.section{margin-bottom:32px}
+.section h2{font-size:17px;margin-bottom:14px}
+.sheets{display:flex;gap:24px;flex-wrap:wrap}
+.sheet-card{background:#fff;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.08);padding:20px;min-width:420px;flex:1}
+.sheet-card h3{font-size:13px;color:#555;margin-bottom:10px;font-weight:600}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{border:1px solid #dde1e6;padding:7px 12px;text-align:center}
+th{font-weight:600;font-size:12px;white-space:nowrap}
+.key-h{background:#FFFFCC}
+.src-h{background:#CCFFCC}
+.dst-h{background:#FFCC99}
+td.formula{background:#eef;font-style:italic;font-size:12px;color:#666}
+td.changed{background:#fff3cd;font-weight:600}
+td.added{background:#d4edda;font-weight:600}
+td.empty-cell{color:#ccc}
+td.protected{background:#fde2e2;font-size:11px;color:#c0392b}
+td.skip-text{font-size:11px;color:#999}
+.arr{color:#e74c3c;font-size:10px;opacity:.8}
+.arr::before{content:" \2190 "}
+.results-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.rc{background:#fff;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.08);padding:18px;overflow-x:auto}
+.rc h3{font-size:14px;margin-bottom:4px;padding-bottom:6px;border-bottom:3px solid #eee;display:flex;align-items:center;gap:8px}
+.rc p.desc{font-size:11px;color:#999;margin-bottom:10px}
+.badge{display:inline-block;padding:1px 8px;border-radius:3px;font-size:11px;font-weight:700;color:#fff}
+.rc1 h3{border-color:#3498db} .rc2 h3{border-color:#95a5a6}
+.rc3 h3{border-color:#2ecc71} .rc4 h3{border-color:#e67e22}
+.rc5 h3{border-color:#9b59b6} .rc6 h3{border-color:#e74c3c}
+.note{margin-top:10px;font-size:11px;color:#666;background:#f8f9fa;padding:8px 10px;border-radius:4px;line-height:1.5}
+.note b{color:#333}
+.grid-3{grid-template-columns:1fr 1fr 1fr}
+@media(max-width:1100px){.results-grid{grid-template-columns:1fr}.grid-3{grid-template-columns:1fr 1fr}}
+.legend{display:flex;gap:16px;margin-bottom:20px;flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:12px;color:#555}
+.legend-c{width:14px;height:14px;border-radius:3px;border:1px solid rgba(0,0,0,.12)}
+.full-width{grid-column:1/-1}
+</style>
+</head>
+<body>
+
+<h1>Подстановка — полные примеры</h1>
+<p class="subtitle">Все возможные варианты: формулы, пустые ячейки, текст vs числа, отсутствие строк</p>
+
+<div class="rules">
+<h2>Правила работы</h2>
+<ul>
+<li class="r1"><b>Формулы защищены</b> — ячейки с формулами в получателе никогда не перезаписываются (проверка HasFormula)</li>
+<li class="r2"><b>Пустой источник пропускается</b> — если ячейка в источнике пуста, ячейка получателя не затирается (IsSourceEmpty)</li>
+<li class="r3"><b>Числа только</b> — режимы Минимум, Максимум, Сумма работают только с числами; текстовые ячейки не затрагиваются</li>
+<li class="r4"><b>Уникальные строки</b> — строка А006 есть только в получателе и не трогается (кроме режима Добавить, который добавляет отсутствующие строки из источника)</li>
+<li class="r5"><b>Ключевые столбцы не перезаписываются</b> — столбец «Артикул» используется только для поиска совпадений</li>
+</ul>
+</div>
+
+<div class="section">
+<h2>Исходные данные</h2>
+<div class="sheets">
+<div class="sheet-card">
+<h3>Лист 1 — Источник</h3>
+<table>
+<tr><th class="key-h">Артикул</th><th class="src-h">Наименование</th><th class="src-h">Цена</th><th class="src-h">Кол-во</th></tr>
+<tr><td>А001</td><td>Товар А</td><td>100</td><td>5</td></tr>
+<tr><td>А002</td><td>Товар Б</td><td>200</td><td>3</td></tr>
+<tr><td>А003</td><td class="empty-cell">—</td><td>150</td><td class="empty-cell">—</td></tr>
+<tr><td>А004</td><td>Товар Г</td><td>300</td><td>2</td></tr>
+<tr><td>А005</td><td class="empty-cell">—</td><td>400</td><td class="empty-cell">—</td></tr>
+</table>
+</div>
+<div class="sheet-card">
+<h3>Лист 2 — Получатель (до подстановки)</h3>
+<table>
+<tr><th class="key-h">Артикул</th><th class="dst-h">Наименование</th><th class="dst-h">Цена</th><th class="dst-h">Кол-во</th></tr>
+<tr><td>А001</td><td>Товар А</td><td class="formula">=B1*2</td><td>5</td></tr>
+<tr><td>А002</td><td>Товар Б</td><td>250</td><td class="empty-cell">—</td></tr>
+<tr><td>А003</td><td>Товар В</td><td class="empty-cell">—</td><td>10</td></tr>
+<tr><td>А004</td><td>Товар Г</td><td>280</td><td>1</td></tr>
+<tr><td>А006</td><td>Товар Е</td><td>600</td><td class="empty-cell">—</td></tr>
+</table>
+<div class="note"><b>А001 Цена</b> = формула, <b>А006</b> — есть только в получателе, <b>А005</b> — есть только в источнике</div>
+</div>
+</div>
+</div>
+
+<div class="section">
+<h2>Результаты — 6 режимов</h2>
+<div class="results-grid">
+
+<!-- rcAll -->
+<div class="rc rc1">
+<h3>Все <span class="badge" style="background:#3498db">rcAll</span></h3>
+<p class="desc">Заменить все совпадающие ячейки значениями из источника</p>
+<table>
+<tr><th class="key-h">Артикул</th><th>Наименование</th><th>Цена</th><th>Кол-во</th></tr>
+<tr><td>А001</td><td>Товар А</td><td class="protected">=B1*2 <span class="arr">формула</span></td><td>5</td></tr>
+<tr><td>А002</td><td>Товар Б</td><td class="changed">200 <span class="arr">250</span></td><td class="changed">3 <span class="arr">—</span></td></tr>
+<tr><td>А003</td><td>Товар В <span class="arr">источн. пуст</span></td><td class="changed">150 <span class="arr">—</span></td><td>10 <span class="arr">источн. пуст</span></td></tr>
+<tr><td>А004</td><td>Товар Г</td><td class="changed">300 <span class="arr">280</span></td><td class="changed">2 <span class="arr">1</span></td></tr>
+<tr><td>А006</td><td>Товар Е <span class="arr">нет в источн.</span></td><td>600</td><td class="empty-cell">—</td></tr>
+</table>
+<div class="note"><b>А001</b> — формула защищена. <b>А003</b> — пустой источник не затирает получатель. <b>А006</b> — нет в источнике, не трогается.</div>
+</div>
+
+<!-- rcEmpty -->
+<div class="rc rc2">
+<h3>Пустые <span class="badge" style="background:#95a5a6">rcEmpty</span></h3>
+<p class="desc">Заполнить только пустые ячейки получателя</p>
+<table>
+<tr><th class="key-h">Артикул</th><th>Наименование</th><th>Цена</th><th>Кол-во</th></tr>
+<tr><td>А001</td><td>Товар А</td><td class="protected">=B1*2</td><td>5</td></tr>
+<tr><td>А002</td><td>Товар Б</td><td>250</td><td class="changed">3 <span class="arr">—</span></td></tr>
+<tr><td>А003</td><td>Товар В <span class="arr">источн. пуст</span></td><td class="changed">150 <span class="arr">—</span></td><td>10</td></tr>
+<tr><td>А004</td><td>Товар Г</td><td>280</td><td>1</td></tr>
+<tr><td>А006</td><td>Товар Е <span class="arr">нет в источн.</span></td><td>600</td><td class="empty-cell">—</td></tr>
+</table>
+<div class="note">Заполняются только ячейки которые были пустые в получателе И непустые в источнике. <b>А004</b> — все заполнены, без изменений.</div>
+</div>
+
+<!-- rcMin -->
+<div class="rc rc3">
+<h3>Минимум <span class="badge" style="background:#2ecc71">rcMin</span></h3>
+<p class="desc">Оставить наименьшее значение (только числа)</p>
+<table>
+<tr><th class="key-h">Артикул</th><th>Наименование</th><th>Цена</th><th>Кол-во</th></tr>
+<tr><td>А001</td><td>Товар А <span class="skip-text">текст</span></td><td class="protected">=B1*2</td><td>5</td></tr>
+<tr><td>А002</td><td>Товар Б <span class="skip-text">текст</span></td><td class="changed">200 <span class="arr">min(250,200)</span></td><td class="changed">3 <span class="arr">—</span></td></tr>
+<tr><td>А003</td><td>Товар В <span class="arr">источн. пуст</span></td><td class="changed">150 <span class="arr">—</span></td><td>10 <span class="arr">источн. пуст</span></td></tr>
+<tr><td>А004</td><td>Товар Г <span class="skip-text">текст</span></td><td>280</td><td>1</td></tr>
+<tr><td>А006</td><td>Товар Е <span class="arr">нет в источн.</span></td><td>600</td><td class="empty-cell">—</td></tr>
+</table>
+<div class="note"><b>А004</b>: min(280,300)=280 и min(1,2)=1 — получатель уже меньше, без изменений. Текстовые столбцы не затрагиваются.</div>
+</div>
+
+<!-- rcMax -->
+<div class="rc rc4">
+<h3>Максимум <span class="badge" style="background:#e67e22">rcMax</span></h3>
+<p class="desc">Оставить наибольшее значение (только числа)</p>
+<table>
+<tr><th class="key-h">Артикул</th><th>Наименование</th><th>Цена</th><th>Кол-во</th></tr>
+<tr><td>А001</td><td>Товар А <span class="skip-text">текст</span></td><td class="protected">=B1*2</td><td>5</td></tr>
+<tr><td>А002</td><td>Товар Б <span class="skip-text">текст</span></td><td>250</td><td class="changed">3 <span class="arr">—</span></td></tr>
+<tr><td>А003</td><td>Товар В <span class="arr">источн. пуст</span></td><td class="changed">150 <span class="arr">—</span></td><td>10 <span class="arr">источн. пуст</span></td></tr>
+<tr><td>А004</td><td>Товар Г <span class="skip-text">текст</span></td><td class="changed">300 <span class="arr">max(280,300)</span></td><td class="changed">2 <span class="arr">max(1,2)</span></td></tr>
+<tr><td>А006</td><td>Товар Е <span class="arr">нет в источн.</span></td><td>600</td><td class="empty-cell">—</td></tr>
+</table>
+<div class="note"><b>А002</b>: max(250,200)=250 — получатель больше, без изменений. <b>А004</b>: оба значения меньше в источнике — заменяются.</div>
+</div>
+
+<!-- rcAdd -->
+<div class="rc rc5">
+<h3>Добавить <span class="badge" style="background:#9b59b6">rcAdd</span></h3>
+<p class="desc">Заменить все + добавить отсутствующие строки из источника</p>
+<table>
+<tr><th class="key-h">Артикул</th><th>Наименование</th><th>Цена</th><th>Кол-во</th></tr>
+<tr><td>А001</td><td>Товар А</td><td class="protected">=B1*2</td><td>5</td></tr>
+<tr><td>А002</td><td>Товар Б</td><td class="changed">200 <span class="arr">250</span></td><td class="changed">3 <span class="arr">—</span></td></tr>
+<tr><td>А003</td><td>Товар В <span class="arr">источн. пуст</span></td><td class="changed">150 <span class="arr">—</span></td><td>10 <span class="arr">источн. пуст</span></td></tr>
+<tr><td>А004</td><td>Товар Г</td><td class="changed">300 <span class="arr">280</span></td><td class="changed">2 <span class="arr">1</span></td></tr>
+<tr><td>А006</td><td>Товар Е <span class="arr">нет в источн.</span></td><td>600</td><td class="empty-cell">—</td></tr>
+<tr class="added"><td>А005</td><td class="empty-cell">—</td><td>400</td><td class="empty-cell">—</td></tr>
+</table>
+<div class="note"><b>А005</b> добавлена из источника (ключ отсутствовал в получателе). Пустые ячейки в источнике копируются как пустые. <b>А006</b> не удаляется — она только в получателе.</div>
+</div>
+
+<!-- rcSum -->
+<div class="rc rc6">
+<h3>Сумма <span class="badge" style="background:#e74c3c">rcSum</span></h3>
+<p class="desc">Сложить значения источника и получателя (только числа)</p>
+<table>
+<tr><th class="key-h">Артикул</th><th>Наименование</th><th>Цена</th><th>Кол-во</th></tr>
+<tr><td>А001</td><td>Товар А <span class="skip-text">текст</span></td><td class="protected">=B1*2</td><td class="changed">10 <span class="arr">5+5</span></td></tr>
+<tr><td>А002</td><td>Товар Б <span class="skip-text">текст</span></td><td class="changed">450 <span class="arr">250+200</span></td><td class="changed">3 <span class="arr">—+3</span></td></tr>
+<tr><td>А003</td><td>Товар В <span class="arr">источн. пуст</span></td><td class="changed">150 <span class="arr">—+150</span></td><td>10 <span class="arr">источн. пуст</span></td></tr>
+<tr><td>А004</td><td>Товар Г <span class="skip-text">текст</span></td><td class="changed">580 <span class="arr">280+300</span></td><td class="changed">3 <span class="arr">1+2</span></td></tr>
+<tr><td>А006</td><td>Товар Е <span class="arr">нет в источн.</span></td><td>600</td><td class="empty-cell">—</td></tr>
+</table>
+<div class="note">Пустая ячейка в получателе = 0 при сложении. Пустой источник — пропускается. Формулы защищены.</div>
+</div>
+
+</div>
+</div>
+
+<div class="section">
+<h2>Сводная таблица: что происходит с каждой ячейкой</h2>
+<div class="sheet-card" style="min-width:auto">
+<table style="font-size:12px">
+<tr>
+<th class="key-h" rowspan="2">Строка</th>
+<th class="key-h" rowspan="2">Ячейка</th>
+<th class="src-h" rowspan="2">Источник</th>
+<th class="dst-h" rowspan="2">Получатель</th>
+<th class="dst-h" rowspan="2">Тип</th>
+<th>Все</th><th>Пустые</th><th>Мин</th><th>Макс</th><th>Добавить</th><th>Сумма</th>
+</tr>
+<tr>
+<th style="background:#3498db;color:#fff">rcAll</th>
+<th style="background:#95a5a6;color:#fff">rcEmpty</th>
+<th style="background:#2ecc71;color:#fff">rcMin</th>
+<th style="background:#e67e22;color:#fff">rcMax</th>
+<th style="background:#9b59b6;color:#fff">rcAdd</th>
+<th style="background:#e74c3c;color:#fff">rcSum</th>
+</tr>
+
+<tr><td rowspan="4" class="key-h">А001</td><td>Имя</td><td>Товар А</td><td>Товар А</td><td>текст</td><td>=</td><td>=</td><td>skip</td><td>skip</td><td>=</td><td>skip</td></tr>
+<tr><td>Цена</td><td>100</td><td class="formula">=B1*2</td><td>формула</td><td class="protected">locked</td><td class="protected">locked</td><td class="protected">locked</td><td class="protected">locked</td><td class="protected">locked</td><td class="protected">locked</td></tr>
+<tr><td>Кол-во</td><td>5</td><td>5</td><td>число</td><td>=</td><td>=</td><td>=</td><td>=</td><td>=</td><td>10</td></tr>
+
+<tr><td rowspan="4" class="key-h">А002</td><td>Имя</td><td>Товар Б</td><td>Товар Б</td><td>текст</td><td>=</td><td>=</td><td>skip</td><td>skip</td><td>=</td><td>skip</td></tr>
+<tr><td>Цена</td><td>200</td><td>250</td><td>число</td><td class="changed">200</td><td>=</td><td class="changed">200</td><td>=</td><td class="changed">200</td><td class="changed">450</td></tr>
+<tr><td>Кол-во</td><td>3</td><td class="empty-cell">—</td><td>пустая</td><td class="changed">3</td><td class="changed">3</td><td class="changed">3</td><td class="changed">3</td><td class="changed">3</td><td class="changed">3</td></tr>
+
+<tr><td rowspan="4" class="key-h">А003</td><td>Имя</td><td class="empty-cell">—</td><td>Товар В</td><td>пустой ист.</td><td>skip</td><td>skip</td><td>skip</td><td>skip</td><td>skip</td><td>skip</td></tr>
+<tr><td>Цена</td><td>150</td><td class="empty-cell">—</td><td>пустая</td><td class="changed">150</td><td class="changed">150</td><td class="changed">150</td><td class="changed">150</td><td class="changed">150</td><td class="changed">150</td></tr>
+<tr><td>Кол-во</td><td class="empty-cell">—</td><td>10</td><td>пустой ист.</td><td>skip</td><td>=</td><td>skip</td><td>skip</td><td>skip</td><td>skip</td></tr>
+
+<tr><td rowspan="4" class="key-h">А004</td><td>Имя</td><td>Товар Г</td><td>Товар Г</td><td>текст</td><td>=</td><td>=</td><td>skip</td><td>skip</td><td>=</td><td>skip</td></tr>
+<tr><td>Цена</td><td>300</td><td>280</td><td>число</td><td class="changed">300</td><td>=</td><td>=</td><td class="changed">300</td><td class="changed">300</td><td class="changed">580</td></tr>
+<tr><td>Кол-во</td><td>2</td><td>1</td><td>число</td><td class="changed">2</td><td>=</td><td>=</td><td class="changed">2</td><td class="changed">2</td><td class="changed">3</td></tr>
+
+<tr><td rowspan="3" class="key-h">А006</td><td>Имя</td><td class="empty-cell">нет</td><td>Товар Е</td><td>нет в ист.</td><td>skip</td><td>skip</td><td>skip</td><td>skip</td><td>skip</td><td>skip</td></tr>
+<tr><td>Цена</td><td class="empty-cell">—</td><td>600</td><td>нет в ист.</td><td>skip</td><td>skip</td><td>skip</td><td>skip</td><td>skip</td><td>skip</td></tr>
+<tr><td>Кол-во</td><td class="empty-cell">—</td><td class="empty-cell">—</td><td>нет в ист.</td><td>skip</td><td>skip</td><td>skip</td><td>skip</td><td>skip</td><td>skip</td></tr>
+
+<tr class="added"><td colspan="4">А005 — добавляется в режиме rcAdd</td><td>—</td><td>—</td><td>—</td><td>—</td><td class="added">+строка</td><td>—</td></tr>
+</table>
+<div class="note" style="margin-top:12px">
+<b>=</b> без изменений &nbsp;
+<b>skip</b> пропущено (текст/пустой источник/нет совпадения) &nbsp;
+<b>locked</b> формула защищена &nbsp;
+<b>число</b> результат замены/операции &nbsp;
+<b>+строка</b> новая строка добавлена
+</div>
+</div>
+</div>
+
+</body>
+</html>
