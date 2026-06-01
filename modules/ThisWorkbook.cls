@@ -10,14 +10,11 @@ Attribute VB_Exposed = True
 Option Explicit
 
 Private Sub Workbook_Open()
-    RestoreAssignments Me
+    Set g_AppEvents = New AppEvents
+    Set g_AppEvents.App = Application
     RefreshRibbon
 End Sub
 
-Private Sub Workbook_SheetActivate(ByVal Sh As Object)
-    RefreshRibbon
-End Sub
-
-Private Sub Workbook_SheetBeforeDoubleClick(ByVal Sh As Object, ByVal Target As Range, Cancel As Boolean)
-    HandleDoubleClick Sh, Target, Cancel
+Private Sub Workbook_BeforeClose(Cancel As Boolean)
+    Set g_AppEvents = Nothing
 End Sub

@@ -5,43 +5,6 @@ Public Sub RibbonOnLoad(ribbon As IRibbonUI)
     Set g_Ribbon = ribbon
 End Sub
 
-Public Sub getEnabled(control As IRibbonControl, ByRef returnedVal)
-    returnedVal = False
-    Select Case control.Id
-        Case "btnSrcSheet", "btnDstSheet"
-            returnedVal = True
-        Case "btnClear"
-            returnedVal = Not (g_SheetSrc Is Nothing And g_SheetDst Is Nothing)
-        Case "btnColKey", "btnColSrc", "btnColDst"
-            returnedVal = GetSheetRole(ActiveSheet) <> NilRole
-        Case "btnReplaceAll", "btnFillEmpty", "btnMinimize", "btnMaximize", "btnAddItems", "btnSumValues"
-            returnedVal = Not (g_SheetSrc Is Nothing Or g_SheetDst Is Nothing)
-    End Select
-End Sub
-
-Public Sub getLabel(control As IRibbonControl, ByRef returnedVal)
-    Dim ws As Worksheet
-    Set ws = ActiveSheet
-    Dim role As Long
-    role = GetSheetRole(ws)
-    Select Case control.Id
-        Case "btnSrcSheet"
-            If role = SrcRole Then
-                returnedVal = "\u041b\u0438\u0441\u0442-\u0438\u0441\u0442\u043e\u0447\u043d\u0438\u043a [" & ws.Name & "]"
-            Else
-                returnedVal = "\u041b\u0438\u0441\u0442-\u0438\u0441\u0442\u043e\u0447\u043d\u0438\u043a"
-            End If
-        Case "btnDstSheet"
-            If role = DstRole Then
-                returnedVal = "\u041b\u0438\u0441\u0442-\u043f\u043e\u043b\u0443\u0447\u0430\u0442\u0435\u043b\u044c [" & ws.Name & "]"
-            Else
-                returnedVal = "\u041b\u0438\u0441\u0442-\u043f\u043e\u043b\u0443\u0447\u0430\u0442\u0435\u043b\u044c"
-            End If
-        Case Else
-            returnedVal = control.Label
-    End Select
-End Sub
-
 Public Sub btnSrcSheet_click(control As IRibbonControl)
     ToggleSheetAssignment ActiveSheet, SrcRole
 End Sub
@@ -88,4 +51,45 @@ End Sub
 
 Public Sub btnSumValues_click(control As IRibbonControl)
     DoReplace rcSum
+End Sub
+
+Public Sub getEnabled(control As IRibbonControl, ByRef returnedVal)
+    returnedVal = False
+    
+    Select Case control.Id
+        Case "btnSrcSheet"
+            returnedVal = True
+        Case "btnDstSheet"
+            returnedVal = True
+        Case "btnClear"
+            returnedVal = Not (g_SheetSrc Is Nothing And g_SheetDst Is Nothing)
+        Case "btnColKey", "btnColSrc", "btnColDst"
+            returnedVal = GetSheetRole(ActiveSheet) <> NilRole
+        Case "btnReplaceAll", "btnFillEmpty", "btnMinimize", "btnMaximize", "btnAddItems", "btnSumValues"
+            returnedVal = Not (g_SheetSrc Is Nothing Or g_SheetDst Is Nothing)
+    End Select
+End Sub
+
+Public Sub getLabel(control As IRibbonControl, ByRef returnedVal)
+    Dim ws As Worksheet
+    Set ws = ActiveSheet
+    Dim role As Long
+    role = GetSheetRole(ws)
+    
+    Select Case control.Id
+        Case "btnSrcSheet"
+            If role = SrcRole Then
+                returnedVal = "Лист-источник [" & ws.Name & "] " & Chr(10004)
+            Else
+                returnedVal = "Лист-источник"
+            End If
+        Case "btnDstSheet"
+            If role = DstRole Then
+                returnedVal = "Лист-получатель [" & ws.Name & "] " & Chr(10004)
+            Else
+                returnedVal = "Лист-получатель"
+            End If
+        Case Else
+            returnedVal = control.Label
+    End Select
 End Sub

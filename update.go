@@ -58,12 +58,14 @@ On Error Resume Next
 vb.VBComponents.Remove vb.VBComponents("ModSubstCore")
 vb.VBComponents.Remove vb.VBComponents("ModSubstUtils")
 vb.VBComponents.Remove vb.VBComponents("ModSubstUI")
+vb.VBComponents.Remove vb.VBComponents("AppEvents")
 On Error GoTo 0
 
 On Error Resume Next
 vb.VBComponents.Import "` + modAbsDir + `\ModSubstCore.bas"
 vb.VBComponents.Import "` + modAbsDir + `\ModSubstUtils.bas"
 vb.VBComponents.Import "` + modAbsDir + `\ModSubstUI.bas"
+vb.VBComponents.Import "` + modAbsDir + `\AppEvents.cls"
 importErr = Err.Number
 On Error GoTo 0
 
