@@ -54,6 +54,7 @@ If errNum <> 0 Then
 End If
 
 On Error Resume Next
+vb.VBComponents.Remove vb.VBComponents("ModSubstGlobals")
 vb.VBComponents.Remove vb.VBComponents("ModSubstCore")
 vb.VBComponents.Remove vb.VBComponents("ModSubstUtils")
 vb.VBComponents.Remove vb.VBComponents("ModSubstUI")
@@ -61,6 +62,9 @@ vb.VBComponents.Remove vb.VBComponents("AppEvents")
 On Error GoTo 0
 
 On Error Resume Next
+vb.VBComponents.Import "` + modAbsDir + `\ModSubstGlobals.bas"
+err0 = Err.Number
+Err.Clear
 vb.VBComponents.Import "` + modAbsDir + `\AppEvents.cls"
 err4 = Err.Number
 Err.Clear
@@ -74,8 +78,9 @@ vb.VBComponents.Import "` + modAbsDir + `\ModSubstUI.bas"
 err3 = Err.Number
 On Error GoTo 0
 
-If err1 <> 0 Or err2 <> 0 Or err3 <> 0 Or err4 <> 0 Then
+If err0 <> 0 Or err1 <> 0 Or err2 <> 0 Or err3 <> 0 Or err4 <> 0 Then
     msg = "Import errors:" & vbCrLf
+    msg = msg & "ModSubstGlobals: " & err0 & vbCrLf
     msg = msg & "AppEvents: " & err4 & vbCrLf
     msg = msg & "ModSubstCore: " & err1 & vbCrLf
     msg = msg & "ModSubstUtils: " & err2 & vbCrLf
