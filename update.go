@@ -9,6 +9,12 @@ import (
 	"strings"
 )
 
+func init() {
+	if runtime.GOOS == "windows" {
+		exec.Command("chcp", "65001").Run()
+	}
+}
+
 const (
 	xlsmName   = "Книга1.xlsm"
 	modulesDir = "modules"
@@ -59,7 +65,13 @@ func updateMac(xlsmPath, modDir string) {
 			fmt.Printf("Пропуск: %s не найден\n", file)
 			continue
 		}
-		abs, _ := filepath.Abs(p)
+		tmp, err := convertToAnsi(p)
+		if err != nil {
+			fmt.Printf("Ошибка конвертации %s: %v\n", file, err)
+			continue
+		}
+		defer os.Remove(tmp)
+		abs, _ := filepath.Abs(tmp)
 		vba("On Error Resume Next")
 		vba(fmt.Sprintf(`ThisWorkbook.VBProject.VBComponents.Remove ThisWorkbook.VBProject.VBComponents("%s")`, name))
 		vba("On Error GoTo 0")
@@ -101,9 +113,15 @@ func updateWin(xlsmPath, modDir string) {
 			fmt.Printf("Пропуск: %s не найден\n", file)
 			continue
 		}
-		abs, _ := filepath.Abs(p)
-		sb.WriteString(fmt.Sprintf("On Error Resume Next\n"))
-		sb.WriteString(fmt.Sprintf("For Each c In vb.VBComponents\n"))
+		tmp, err := convertToAnsi(p)
+		if err != nil {
+			fmt.Printf("Ошибка конвертации %s: %v\n", file, err)
+			continue
+		}
+		defer os.Remove(tmp)
+		abs, _ := filepath.Abs(tmp)
+		sb.WriteString("On Error Resume Next\n")
+		sb.WriteString("For Each c In vb.VBComponents\n")
 		sb.WriteString(fmt.Sprintf("    If c.Name = \"%s\" Then vb.VBComponents.Remove c\n", name))
 		sb.WriteString("Next\n")
 		sb.WriteString("On Error GoTo 0\n")
@@ -160,6 +178,91 @@ func readCodeLines(path string) []string {
 		lines = append(lines, strings.TrimRight(line, "\r"))
 	}
 	return lines
+}
+
+func convertToAnsi(srcPath string) (string, error) {
+	data, err := os.ReadFile(srcPath)
+	if err != nil {
+		return "", err
+	}
+	converted := utf8ToWin1251(data)
+	tmp := filepath.Join(os.TempDir(), filepath.Base(srcPath)+".ansi")
+	err = os.WriteFile(tmp, converted, 0644)
+	return tmp, err
+}
+
+func utf8ToWin1251(data []byte) []byte {
+	result := make([]byte, 0, len(data))
+	for i := 0; i < len(data); {
+		b := data[i]
+		switch {
+		case b < 0x80:
+			result = append(result, b)
+			i++
+		case b == 0xC2:
+			if i+1 < len(data) {
+				b2 := data[i+1]
+				i += 2
+				switch b2 {
+				case 0x85:
+					result = append(result, 0xA5)
+				case 0x89:
+					result = append(result, 0xA9)
+				case 0x8A:
+					result = append(result, 0xAA)
+				default:
+					result = append(result, '?')
+				}
+			} else {
+				result = append(result, '?')
+				i++
+			}
+		case b == 0xD0:
+			if i+1 < len(data) {
+				b2 := data[i+1]
+				i += 2
+				switch {
+				case b2 == 0x81:
+					result = append(result, 0xA1)
+				case b2 >= 0x90 && b2 <= 0xBF:
+					result = append(result, b2+0x30)
+				default:
+					result = append(result, '?')
+				}
+			} else {
+				result = append(result, '?')
+				i++
+			}
+		case b == 0xD1:
+			if i+1 < len(data) {
+				b2 := data[i+1]
+				i += 2
+				switch {
+				case b2 == 0x91:
+					result = append(result, 0xB8)
+				case b2 >= 0x80 && b2 <= 0x8F:
+					result = append(result, b2+0x70)
+				default:
+					result = append(result, '?')
+				}
+			} else {
+				result = append(result, '?')
+				i++
+			}
+		case b == 0xE2:
+			if i+2 < len(data) && data[i+1] == 0x80 && data[i+2] == 0x99 {
+				result = append(result, 0x99)
+				i += 3
+			} else {
+				result = append(result, '?')
+				i++
+			}
+		default:
+			result = append(result, '?')
+			i++
+		}
+	}
+	return result
 }
 
 func fatal(format string, args ...any) {
