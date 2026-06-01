@@ -71,8 +71,11 @@ On Error Resume Next
 excel.Run "InstallModules"
 If Err.Number <> 0 Then
     MsgBox "Installer.bas not found in workbook." & vbCrLf & vbCrLf & _
-           "Import it once: Alt+F11 -> right-click -> Import File -> modules/Installer.bas" & vbCrLf & _
-           "Then save and run update again.", vbExclamation, "Update"
+           "Import it once:" & vbCrLf & _
+           "1. Alt+F11" & vbCrLf & _
+           "2. Right-click -> Import File" & vbCrLf & _
+           "3. Select modules/Installer.bas" & vbCrLf & _
+           "4. Ctrl+S, then run update again", vbExclamation, "Update"
     wb.Close False
     excel.Quit
     WScript.Quit 1
