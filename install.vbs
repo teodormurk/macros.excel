@@ -19,10 +19,10 @@ End Function
 Function StripBasHeader(code)
     lines = Split(code, vbCrLf)
     result = ""
-    For i = 0 To UBound(lines)
-        line = Trim(lines(i))
+    For li = 0 To UBound(lines)
+        line = Trim(lines(li))
         If Left(line, 10) <> "Attribute " And Left(line, 7) <> "VERSION " And line <> "BEGIN" And line <> "END" Then
-            result = result & lines(i) & vbCrLf
+            result = result & lines(li) & vbCrLf
         End If
     Next
     StripBasHeader = result
@@ -32,15 +32,15 @@ Function StripClsHeader(code)
     lines = Split(code, vbCrLf)
     result = ""
     started = False
-    For i = 0 To UBound(lines)
-        line = Trim(lines(i))
+    For li = 0 To UBound(lines)
+        line = Trim(lines(li))
         If Not started Then
             If Left(line, 7) = "Option " Or Left(line, 7) = "Private " Or Left(line, 7) = "Public " Then
                 started = True
             End If
         End If
         If started Then
-            result = result & lines(i) & vbCrLf
+            result = result & lines(li) & vbCrLf
         End If
     Next
     StripClsHeader = result
