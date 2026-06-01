@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 )
 
 const (
@@ -101,6 +102,7 @@ excel.Quit
 WScript.Quit 0`
 
 	tmp := filepath.Join(os.TempDir(), "update_macros.vbs")
+	vbs = strings.ReplaceAll(vbs, "\n", "\r\n")
 	os.WriteFile(tmp, utf8ToWin1251([]byte(vbs)), 0644)
 	defer os.Remove(tmp)
 
