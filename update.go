@@ -46,9 +46,8 @@ errNum = Err.Number
 On Error GoTo 0
 
 If errNum <> 0 Then
-    MsgBox "VBA project access denied." & vbCrLf & vbCrLf & _
-           "Excel -> Options -> Trust Center -> Macro Settings" & vbCrLf & _
-           "Check [x] Trust access to the VBA project object model", vbExclamation, "Error"
+    msg = "VBA project access denied." & vbCrLf & vbCrLf & "Excel: Options - Trust Center - Macro Settings - check [x] Trust access to VBA project"
+    MsgBox msg, vbExclamation, "Error"
     wb.Close False
     excel.Quit
     WScript.Quit 1
