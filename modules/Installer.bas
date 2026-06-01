@@ -3,7 +3,22 @@ Option Explicit
 
 Public Sub InstallModules()
     Dim basePath As String
-    basePath = ThisWorkbook.Path & Application.PathSeparator & "modules"
+    basePath = ThisWorkbook.Path
+
+    If basePath = "" Then
+        MsgBox "Сначачите не удалось сохранить книги. " & _
+               "Сохрните и запустите update снова.", vbExclamation, "Error"
+        Exit Sub
+    End If
+
+    Dim modulesPath As String
+    modulesPath = basePath & "Модули" & Application.PathSeparator & "modules"
+
+    If Dir(modulesPath, vbDirectory) = "" Then
+        MsgBox "Папка modules/ не найдена: " & modulesPath & vbCrLf & vbCrLf & _
+               "Положите книгу " & Chr(34) & basePath & Chr(34) & " рядом с update.exe", vbExclamation, "Error"
+        Exit Sub
+    End If
 
     On Error Resume Next
     ThisWorkbook.VBProject.VBComponents.Remove ThisWorkbook.VBProject.VBComponents("ModSubstCore")
@@ -12,21 +27,26 @@ Public Sub InstallModules()
     On Error GoTo 0
 
     Dim f As String
-    f = Dir(basePath & Application.PathSeparator & "*.bas")
+    f = Dir(modulesPath & Application.PathSeparator & "*.bas")
     Do While f <> ""
         If f <> "Installer.bas" Then
-            ThisWorkbook.VBProject.VBComponents.Import basePath & Application.PathSeparator & f
+            Dim importPath As String
+            importPath = modulesPath & Application.PathSeparator & f
+            If Dir(importPath) <> "" Then
+                ThisWorkbook.VBProject.VBComponents.Import importPath
+            End If
         End If
         f = Dir()
     Loop
 
     Dim twPath As String
-    twPath = basePath & Application.PathSeparator & "ThisWorkbook.cls"
+    twPath = modulesPath & Application.PathSeparator & "ThisWorkbook.cls"
     If Dir(twPath) <> "" Then
         UpdateThisWorkbook twPath
     End If
 
     ThisWorkbook.Save
+    MsgBox "Modules updated!", vbInformation, "Done"
 End Sub
 
 Private Sub UpdateThisWorkbook(filePath As String)

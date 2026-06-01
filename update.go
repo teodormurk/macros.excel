@@ -46,7 +46,6 @@ func updateMac(absXlsm string) {
 	exec.Command("osascript", "-e",
 		fmt.Sprintf(`tell application "Microsoft Excel" to open POSIX file "%s"`, absXlsm),
 	).Run()
-
 	fmt.Println("Waiting 3s ...")
 	exec.Command("osascript", "-e", "delay 3").Run()
 
@@ -63,40 +62,72 @@ func updateMac(absXlsm string) {
 }
 
 func updateWin(absXlsm string) {
-	vbs := fmt.Sprintf(`Set excel = CreateObject("Excel.Application")
+	vbs := `Set excel = CreateObject("Excel.Application")
 excel.Visible = True
 excel.DisplayAlerts = False
+
 Set fso = CreateObject("Scripting.FileSystemObject")
-Set f = fso.GetFile("%s")
+Set f = fso.GetFile("` + absXlsm + `")
 shortPath = f.ShortPath
+
 Set wb = excel.Workbooks.Open(shortPath)
+
 On Error Resume Next
-excel.Run "InstallModules"
-If Err.Number <> 0 Then
-    MsgBox "Installer.bas not found in workbook." & vbCrLf & vbCrLf & _
-           "Import it once:" & vbCrLf & _
-           "1. Alt+F11" & vbCrLf & _
-           "2. Right-click -> Import File" & vbCrLf & _
-           "3. Select modules/Installer.bas" & vbCrLf & _
-           "4. Ctrl+S, then run update again", vbExclamation, "Update"
+Set vb = wb.VBProject
+errNum = Err.Number
+On Error GoTo 0
+
+If errNum <> 0 Then
+    MsgBox "VBA project access denied." & vbCrLf & vbCrLf & _
+           "Excel -> File -> Options -> Trust Center -> Trust Center Settings" & vbCrLf & _
+           "-> Macro Settings -> check [x] Trust access to the VBA project object model" & vbCrLf & _
+           "Then run update again.", vbExclamation, "Update"
     wb.Close False
     excel.Quit
     WScript.Quit 1
 End If
+
+hasInstaller = False
+For Each comp In vb.VBComponents
+    If comp.Name = "Installer" Then
+        hasInstaller = True
+        Exit For
+    End If
+Next
+
+If Not hasInstaller Then
+    MsgBox "Installer.bas not found in workbook." & vbCrLf & vbCrLf & _
+           "Import it once:" & vbCrLf & _
+           "1. Alt+F11 (open VBA editor)" & vbCrLf & _
+           "2. Right-click VBAProject -> Import File" & vbCrLf & _
+           "3. Select modules\Installer.bas" & vbCrLf & _
+           "4. Ctrl+S to save" & vbCrLf & _
+           "5. Run update.exe again", vbExclamation, "Update"
+    wb.Close False
+    excel.Quit
+    WScript.Quit 1
+End If
+
+On Error Resume Next
+excel.Run "InstallModules"
+errNum = Err.Number
+On Error GoTo 0
+
+If errNum <> 0 Then
+    MsgBox "InstallModules error. Check VBA editor for details.", vbExclamation, "Error"
+Else
+    MsgBox "Done!", vbInformation, "Update"
+End If
+
 wb.Save
 wb.Close
-excel.Quit`, absXlsm)
+excel.Quit`
 
 	tmp := filepath.Join(os.TempDir(), "update_macros.vbs")
 	os.WriteFile(tmp, utf8ToWin1251([]byte(vbs)), 0644)
 	defer os.Remove(tmp)
 
-	out, err := exec.Command("cscript", "//nologo", tmp).CombinedOutput()
-	fmt.Print(string(out))
-	if err != nil {
-		fatal("cscript error: %s", err)
-	}
-	fmt.Println("Done!")
+	exec.Command("cscript", "//nologo", tmp).Run()
 }
 
 func utf8ToWin1251(data []byte) []byte {
