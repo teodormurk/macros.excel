@@ -58,8 +58,8 @@ For i = 0 To UBound(basFiles)
         On Error GoTo 0
 
         If errNum <> 0 Then
-            logFile.WriteLine "Read ERROR " & errNum & " (ADODB not available, using FSO)"
-            Set f2 = fso.OpenTextFile(filePath, 1, False, -1)
+            logFile.WriteLine "Read ERROR " & errNum & " (ADODB not available, using FSO ANSI)"
+            Set f2 = fso.OpenTextFile(filePath, 1, False, 0)
             code = f2.ReadAll
             f2.Close
         End If
@@ -91,7 +91,7 @@ If fso.FileExists(clsPath) Then
     errNum = Err.Number
     On Error GoTo 0
     If errNum <> 0 Then
-        Set f2 = fso.OpenTextFile(clsPath, 1, False, -1)
+        Set f2 = fso.OpenTextFile(clsPath, 1, False, 0)
         code = f2.ReadAll
         f2.Close
     End If
@@ -123,7 +123,7 @@ If fso.FileExists(twPath) Then
     errNum = Err.Number
     On Error GoTo 0
     If errNum <> 0 Then
-        Set f2 = fso.OpenTextFile(twPath, 1, False, -1)
+        Set f2 = fso.OpenTextFile(twPath, 1, False, 0)
         code = f2.ReadAll
         f2.Close
     End If
