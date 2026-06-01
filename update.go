@@ -61,6 +61,9 @@ vb.VBComponents.Remove vb.VBComponents("AppEvents")
 On Error GoTo 0
 
 On Error Resume Next
+vb.VBComponents.Import "` + modAbsDir + `\AppEvents.cls"
+err4 = Err.Number
+Err.Clear
 vb.VBComponents.Import "` + modAbsDir + `\ModSubstCore.bas"
 err1 = Err.Number
 Err.Clear
@@ -69,17 +72,14 @@ err2 = Err.Number
 Err.Clear
 vb.VBComponents.Import "` + modAbsDir + `\ModSubstUI.bas"
 err3 = Err.Number
-Err.Clear
-vb.VBComponents.Import "` + modAbsDir + `\AppEvents.cls"
-err4 = Err.Number
 On Error GoTo 0
 
 If err1 <> 0 Or err2 <> 0 Or err3 <> 0 Or err4 <> 0 Then
     msg = "Import errors:" & vbCrLf
+    msg = msg & "AppEvents: " & err4 & vbCrLf
     msg = msg & "ModSubstCore: " & err1 & vbCrLf
     msg = msg & "ModSubstUtils: " & err2 & vbCrLf
-    msg = msg & "ModSubstUI: " & err3 & vbCrLf
-    msg = msg & "AppEvents: " & err4
+    msg = msg & "ModSubstUI: " & err3
     MsgBox msg, vbExclamation, "Error"
     wb.Close False
     excel.Quit
