@@ -79,11 +79,11 @@ twPath = "` + modAbsDir + `\ThisWorkbook.cls"
 If fso.FileExists(twPath) Then
     Set cm = vb.VBComponents("ThisWorkbook").CodeModule
     cm.DeleteLines 1, cm.CountOfLines
-    fnum = FreeFile
-    Open twPath For Input As fnum
+    Set tf = fso.OpenTextFile(twPath, 1)
+    lineNum = 0
     started = False
-    Do Until EOF(fnum)
-        Line Input #fnum, line
+    Do While Not tf.AtEndOfStream
+        line = tf.ReadLine
         If Not started Then
             If Left(Trim(line), 10) = "Attribute " Then
                 started = True
@@ -94,7 +94,7 @@ If fso.FileExists(twPath) Then
             cm.InsertLines lineNum, line
         End If
     Loop
-    Close fnum
+    tf.Close
 End If
 
 wb.Save
