@@ -27,15 +27,15 @@ Public Sub getLabel(control As IRibbonControl, ByRef returnedVal)
     Select Case control.Id
         Case "btnSrcSheet"
             If role = SrcRole Then
-                returnedVal = "Р›РёСЃС‚-РёСЃС‚РѕС‡РЅРёРє [" & ws.Name & "] вњ“"
+                returnedVal = "Лист-источник [" & ws.Name & "]"
             Else
-                returnedVal = "Р›РёСЃС‚-РёСЃС‚РѕС‡РЅРёРє"
+                returnedVal = "Лист-источник"
             End If
         Case "btnDstSheet"
             If role = DstRole Then
-                returnedVal = "Р›РёСЃС‚-РїРѕР»СѓС‡Р°С‚РµР»СЊ [" & ws.Name & "] вњ“"
+                returnedVal = "Лист-получатель [" & ws.Name & "]"
             Else
-                returnedVal = "Р›РёСЃС‚-РїРѕР»СѓС‡Р°С‚РµР»СЊ"
+                returnedVal = "Лист-получатель"
             End If
         Case Else
             returnedVal = control.Label

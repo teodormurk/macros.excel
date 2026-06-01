@@ -66,7 +66,7 @@ Public Sub DoReplace(mode As Long)
     Dim errMsg As String
     errMsg = ValidateSetup()
     If errMsg <> "" Then
-        MsgBox errMsg, vbExclamation, "РџРѕРґСЃС‚Р°РЅРѕРІРєР°"
+        MsgBox errMsg, vbExclamation, "Подстановка"
         Exit Sub
     End If
     Application.ScreenUpdating = False
@@ -133,11 +133,11 @@ Public Sub DoReplace(mode As Long)
     Application.Calculation = xlCalculationAutomatic
     Application.EnableEvents = True
     Dim msg As String
-    msg = "РР·РјРµРЅРµРЅРѕ " & CStr(changedCount) & " СЏС‡РµРµРє"
+    msg = "Изменено " & CStr(changedCount) & " ячеек"
     If addedCount > 0 Then
-        msg = msg & vbCrLf & "Р”РѕР±Р°РІР»РµРЅРѕ " & CStr(addedCount) & " СЃС‚СЂРѕРє"
+        msg = msg & vbCrLf & "Добавлено " & CStr(addedCount) & " строк"
     End If
-    MsgBox msg, vbInformation, "РџРѕРґСЃС‚Р°РЅРѕРІРєР°"
+    MsgBox msg, vbInformation, "Подстановка"
 End Sub
 
 Private Function IsSourceEmpty(val As Variant) As Boolean
