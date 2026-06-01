@@ -66,7 +66,7 @@ Public Sub DoReplace(mode As Long)
     Dim errMsg As String
     errMsg = ValidateSetup()
     If errMsg <> "" Then
-        MsgBox errMsg, vbExclamation, "Подстановка"
+        MsgBox errMsg, vbExclamation, "\u041f\u043e\u0434\u0441\u0442\u0430\u043d\u043e\u0432\u043a\u0430"
         Exit Sub
     End If
     Application.ScreenUpdating = False
@@ -133,11 +133,11 @@ Public Sub DoReplace(mode As Long)
     Application.Calculation = xlCalculationAutomatic
     Application.EnableEvents = True
     Dim msg As String
-    msg = "Изменено " & CStr(changedCount) & " ячеек"
+    msg = "\u0418\u0437\u043c\u0435\u043d\u0435\u043d\u043e " & CStr(changedCount) & " \u044f\u0447\u0435\u0435\u043a"
     If addedCount > 0 Then
-        msg = msg & vbCrLf & "Добавлено " & CStr(addedCount) & " строк"
+        msg = msg & vbCrLf & "\u0414\u043e\u0431\u0430\u0432\u043b\u0435\u043d\u043e " & CStr(addedCount) & " \u0441\u0442\u0440\u043e\u043a"
     End If
-    MsgBox msg, vbInformation, "Подстановка"
+    MsgBox msg, vbInformation, "\u041f\u043e\u0434\u0441\u0442\u0430\u043d\u043e\u0432\u043a\u0430"
 End Sub
 
 Private Function IsSourceEmpty(val As Variant) As Boolean

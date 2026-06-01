@@ -118,7 +118,7 @@ Public Sub AssignSelectedColumns(role As Long)
     Dim sheetRole As Long
     sheetRole = GetSheetRole(ws)
     If sheetRole = NilRole Then
-        MsgBox "Сначала назначьте лист", vbExclamation, "Подстановка"
+        MsgBox "\u0421\u043d\u0430\u0447\u0430\u043b\u0430 \u043d\u0430\u0437\u043d\u0430\u0447\u044c\u0442\u0435 \u043b\u0438\u0441\u0442", vbExclamation, "\u041f\u043e\u0434\u0441\u0442\u0430\u043d\u043e\u0432\u043a\u0430"
         Exit Sub
     End If
     Dim sel As Range
@@ -138,11 +138,11 @@ End Sub
 Public Function ValidateSetup() As String
     ValidateSetup = ""
     If g_SheetSrc Is Nothing Then
-        ValidateSetup = "Не назначен лист-источник"
+        ValidateSetup = "\u041d\u0435 \u043d\u0430\u0437\u043d\u0430\u0447\u0435\u043d \u043b\u0438\u0441\u0442-\u0438\u0441\u0442\u043e\u0447\u043d\u0438\u043a"
         Exit Function
     End If
     If g_SheetDst Is Nothing Then
-        ValidateSetup = "Не назначен лист-получатель"
+        ValidateSetup = "\u041d\u0435 \u043d\u0430\u0437\u043d\u0430\u0447\u0435\u043d \u043b\u0438\u0441\u0442-\u043f\u043e\u043b\u0443\u0447\u0430\u0442\u0435\u043b\u044c"
         Exit Function
     End If
     Dim KeyColsSrc As Collection
@@ -150,7 +150,7 @@ Public Function ValidateSetup() As String
     Set KeyColsSrc = GetKeyColumns(g_SheetSrc)
     Set KeyColsDst = GetKeyColumns(g_SheetDst)
     If KeyColsSrc.Count = 0 Or KeyColsDst.Count = 0 Then
-        ValidateSetup = "Не назначены ключевые столбцы"
+        ValidateSetup = "\u041d\u0435 \u043d\u0430\u0437\u043d\u0430\u0447\u0435\u043d\u044b \u043a\u043b\u044e\u0447\u0435\u0432\u044b\u0435 \u0441\u0442\u043e\u043b\u0431\u0446\u044b"
         Exit Function
     End If
     Dim DataColsSrc As Collection
@@ -158,7 +158,7 @@ Public Function ValidateSetup() As String
     Set DataColsSrc = GetDataColumns(g_SheetSrc)
     Set DataColsDst = GetDataColumns(g_SheetDst)
     If DataColsSrc.Count = 0 Or DataColsDst.Count = 0 Then
-        ValidateSetup = "Не назначены столбцы данных"
+        ValidateSetup = "\u041d\u0435 \u043d\u0430\u0437\u043d\u0430\u0447\u0435\u043d\u044b \u0441\u0442\u043e\u043b\u0431\u0446\u044b \u0434\u0430\u043d\u043d\u044b\u0445"
         Exit Function
     End If
 End Function
@@ -215,21 +215,21 @@ Public Sub HandleDoubleClick(Sh As Object, ByVal Target As Range, Cancel As Bool
     End If
     Dim response As VbMsgBoxResult
     If sheetRole = SrcRole Then
-        response = MsgBox("Пометить как столбец-источник?", vbYesNoCancel + vbQuestion, "Подстановка")
+        response = MsgBox("\u041f\u043e\u043c\u0435\u0442\u0438\u0442\u044c \u043a\u0430\u043a \u0441\u0442\u043e\u043b\u0431\u0435\u0446-\u0438\u0441\u0442\u043e\u0447\u043d\u0438\u043a?", vbYesNoCancel + vbQuestion, "\u041f\u043e\u0434\u0441\u0442\u0430\u043d\u043e\u0432\u043a\u0430")
         If response = vbYes Then
             ws.Cells(1, col).Interior.Color = ColorSrc
         ElseIf response = vbNo Then
-            response = MsgBox("Пометить как ключ?", vbYesNo + vbQuestion, "Подстановка")
+            response = MsgBox("\u041f\u043e\u043c\u0435\u0442\u0438\u0442\u044c \u043a\u0430\u043a \u043a\u043b\u044e\u0447?", vbYesNo + vbQuestion, "\u041f\u043e\u0434\u0441\u0442\u0430\u043d\u043e\u0432\u043a\u0430")
             If response = vbYes Then
                 ws.Cells(1, col).Interior.Color = ColorKey
             End If
         End If
     ElseIf sheetRole = DstRole Then
-        response = MsgBox("Пометить как столбец-получатель?", vbYesNoCancel + vbQuestion, "Подстановка")
+        response = MsgBox("\u041f\u043e\u043c\u0435\u0442\u0438\u0442\u044c \u043a\u0430\u043a \u0441\u0442\u043e\u043b\u0431\u0435\u0446-\u043f\u043e\u043b\u0443\u0447\u0430\u0442\u0435\u043b\u044c?", vbYesNoCancel + vbQuestion, "\u041f\u043e\u0434\u0441\u0442\u0430\u043d\u043e\u0432\u043a\u0430")
         If response = vbYes Then
             ws.Cells(1, col).Interior.Color = ColorDst
         ElseIf response = vbNo Then
-            response = MsgBox("Пометить как ключ?", vbYesNo + vbQuestion, "Подстановка")
+            response = MsgBox("\u041f\u043e\u043c\u0435\u0442\u0438\u0442\u044c \u043a\u0430\u043a \u043a\u043b\u044e\u0447?", vbYesNo + vbQuestion, "\u041f\u043e\u0434\u0441\u0442\u0430\u043d\u043e\u0432\u043a\u0430")
             If response = vbYes Then
                 ws.Cells(1, col).Interior.Color = ColorKey
             End If
