@@ -65,7 +65,7 @@ Public Function BuildIndex() As Object
 End Function
 
 Public Sub DoReplace(mode As Long)
-    Dim err As String
+    Dim errMsg As String
     err = ValidateSetup()
     If err <> "" Then
         MsgBox err, vbExclamation, Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029)
