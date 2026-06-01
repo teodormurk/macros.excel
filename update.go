@@ -23,7 +23,7 @@ func main() {
 		fatal("%s not found", xlsmName)
 	}
 	if _, err := os.Stat(modDir); os.IsNotExist(err) {
-		fatal("modules/ directory not found")
+		fatal("modules/ not found")
 	}
 
 	fmt.Printf("Updating %s ...\n", xlsmName)
@@ -42,66 +42,53 @@ func main() {
 }
 
 func updateMac(absXlsm string) {
-	fmt.Println("Opening workbook in Excel ...")
-	out, err := exec.Command("osascript", "-e",
+	fmt.Println("Opening workbook ...")
+	exec.Command("osascript", "-e",
 		fmt.Sprintf(`tell application "Microsoft Excel" to open POSIX file "%s"`, absXlsm),
-	).CombinedOutput()
+	).Run()
+
+	fmt.Println("Waiting 3s ...")
+	exec.Command("osascript", "-e", "delay 3").Run()
+
+	out, err := exec.Command("osascript", "-e",
+		`tell application "Microsoft Excel" to run VBMacro "InstallModules"`).CombinedOutput()
 	if err != nil {
-		fmt.Printf("open: %s: %s\n", err, out)
-	}
-	fmt.Println("Waiting 3s for Excel to load ...")
-	out, _ = exec.Command("osascript", "-e", "delay 3").CombinedOutput()
-
-	macros := []string{
-		`tell application "Microsoft Excel" to run VBMacro "InstallModules"`,
-		`tell application "Microsoft Excel" to do Visual Basic "InstallModules"`,
-	}
-
-	for _, cmd := range macros {
-		fmt.Printf("Trying: %s\n", cmd)
-		out, err := exec.Command("osascript", "-e", cmd).CombinedOutput()
-		if err != nil {
-			fmt.Printf("  -> error: %s\n", strings.TrimSpace(string(out)))
-			continue
-		}
-		fmt.Println("  -> OK!")
+		fmt.Println(string(out))
+		fmt.Println()
+		fmt.Println("Installer not found. Import Installer.bas once:")
+		fmt.Println("  Alt+F11 -> right-click -> Import File -> modules/Installer.bas")
 		return
 	}
-
-	fmt.Println()
-	fmt.Println("=== MANUAL INSTALLATION ===")
-	fmt.Println("Installer.bas was not found in the workbook.")
-	fmt.Println("First-time setup (only once):")
-	fmt.Println("1. Open", xlsmName, "in Excel")
-	fmt.Println("2. Press Alt+F11 (or Option+F11) to open VBA Editor")
-	fmt.Println("3. Right-click on VBAProject -> Import File")
-	fmt.Println("4. Select modules/Installer.bas")
-	fmt.Println("5. Ctrl+S to save")
-	fmt.Println("6. Close and reopen the workbook")
-	fmt.Println("7. Run ./update again")
-	fmt.Println()
-	fmt.Println("Or import all modules manually:")
-	fmt.Println("  modules/ModSubstCore.bas")
-	fmt.Println("  modules/ModSubstUtils.bas")
-	fmt.Println("  modules/ModSubstUI.bas")
-	fmt.Println("  modules/ThisWorkbook.cls (paste code)")
+	fmt.Println("Done!")
 }
 
 func updateWin(absXlsm string) {
-	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf(`Set wb = GetObject("%s")`, absXlsm))
-	sb.WriteString("\nOn Error Resume Next\n")
-	sb.WriteString("wb.Application.Run \"InstallModules\"\n")
-	sb.WriteString("If Err.Number <> 0 Then\n")
-	sb.WriteString("  WScript.Echo \"ERROR: Installer macro not found. Import Installer.bas first.\"\n")
-	sb.WriteString("End If\n")
-	tmp := filepath.Join(os.TempDir(), "run_installer.vbs")
-	os.WriteFile(tmp, []byte(sb.String()), 0644)
+	vbs := fmt.Sprintf(`Set excel = CreateObject("Excel.Application")
+excel.Visible = True
+excel.DisplayAlerts = False
+Set wb = excel.Workbooks.Open("%s")
+On Error Resume Next
+excel.Run "InstallModules"
+If Err.Number <> 0 Then
+    MsgBox "Installer.bas not found in workbook." & vbCrLf & vbCrLf & _
+           "Import it once: Alt+F11 -> right-click -> Import File -> modules/Installer.bas" & vbCrLf & _
+           "Then save and run update again.", vbExclamation, "Update"
+    wb.Close False
+    excel.Quit
+    WScript.Quit 1
+End If
+wb.Save
+wb.Close
+excel.Quit`, absXlsm)
+
+	tmp := filepath.Join(os.TempDir(), "update_macros.vbs")
+	os.WriteFile(tmp, []byte(vbs), 0644)
 	defer os.Remove(tmp)
+
 	out, err := exec.Command("cscript", "//nologo", tmp).CombinedOutput()
 	fmt.Print(string(out))
 	if err != nil {
-		fatal("cscript: %s", err)
+		fatal("cscript error: %s", err)
 	}
 	fmt.Println("Done!")
 }
