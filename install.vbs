@@ -6,14 +6,40 @@ Set fso = CreateObject("Scripting.FileSystemObject")
 logPath = fso.GetParentFolderName(WScript.ScriptFullName) & "\install_log.txt"
 Set logFile = fso.CreateTextFile(logPath, True, True)
 
-Function ReadFile1251(path)
-    Set stream = CreateObject("ADODB.Stream")
-    stream.Type = 2
-    stream.Charset = "windows-1251"
-    stream.Open
-    stream.LoadFromFile path
-    ReadFile1251 = stream.ReadText
-    stream.Close
+Function ReadFileANSI(path)
+    Set f = fso.OpenTextFile(path, 1, False, 0)
+    ReadFileANSI = f.ReadAll
+    f.Close
+End Function
+
+Function StripAttributes(code)
+    lines = Split(code, vbCrLf)
+    result = ""
+    For i = 0 To UBound(lines)
+        line = Trim(lines(i))
+        If Left(line, 10) <> "Attribute " And Left(line, 7) <> "VERSION " And line <> "BEGIN" And line <> "END" Then
+            result = result & lines(i) & vbCrLf
+        End If
+    Next
+    StripAttributes = result
+End Function
+
+Function StripClsHeader(code)
+    lines = Split(code, vbCrLf)
+    result = ""
+    started = False
+    For i = 0 To UBound(lines)
+        line = Trim(lines(i))
+        If Not started Then
+            If Left(line, 7) = "Option " Or Left(line, 7) = "Private " Or Left(line, 7) = "Public " Then
+                started = True
+            End If
+        End If
+        If started Then
+            result = result & lines(i) & vbCrLf
+        End If
+    Next
+    StripClsHeader = result
 End Function
 
 logFile.WriteLine "=== Install Log ==="
@@ -52,17 +78,8 @@ For i = 0 To UBound(basFiles)
     If Not fso.FileExists(filePath) Then
         logFile.WriteLine "FILE NOT FOUND"
     Else
-        On Error Resume Next
-        code = ReadFile1251(filePath)
-        errNum = Err.Number
-        On Error GoTo 0
-
-        If errNum <> 0 Then
-            logFile.WriteLine "Read ERROR " & errNum & " (ADODB not available, using FSO ANSI)"
-            Set f2 = fso.OpenTextFile(filePath, 1, False, 0)
-            code = f2.ReadAll
-            f2.Close
-        End If
+        code = ReadFileANSI(filePath)
+        code = StripAttributes(code)
 
         modName = Replace(basFiles(i), ".bas", "")
         On Error Resume Next
@@ -86,15 +103,8 @@ Next
 clsPath = scriptDir & "\modules\AppEvents.cls"
 logFile.Write "Import AppEvents.cls: "
 If fso.FileExists(clsPath) Then
-    On Error Resume Next
-    code = ReadFile1251(clsPath)
-    errNum = Err.Number
-    On Error GoTo 0
-    If errNum <> 0 Then
-        Set f2 = fso.OpenTextFile(clsPath, 1, False, 0)
-        code = f2.ReadAll
-        f2.Close
-    End If
+    code = ReadFileANSI(clsPath)
+    code = StripClsHeader(code)
 
     On Error Resume Next
     vb.VBComponents.Remove vb.VBComponents("AppEvents")
@@ -118,35 +128,17 @@ End If
 twPath = scriptDir & "\modules\ThisWorkbook.cls"
 If fso.FileExists(twPath) Then
     logFile.Write "Update ThisWorkbook: "
-    On Error Resume Next
-    code = ReadFile1251(twPath)
-    errNum = Err.Number
-    On Error GoTo 0
-    If errNum <> 0 Then
-        Set f2 = fso.OpenTextFile(twPath, 1, False, 0)
-        code = f2.ReadAll
-        f2.Close
-    End If
+    code = ReadFileANSI(twPath)
+    code = StripClsHeader(code)
 
+    On Error Resume Next
     Set cm = vb.VBComponents("ThisWorkbook").CodeModule
     cm.DeleteLines 1, cm.CountOfLines
     Err.Clear
-
-    lines = Split(code, vbCrLf)
-    started = False
-    lineNum = 0
-    For li = 0 To UBound(lines)
-        line = lines(li)
-        If Not started Then
-            If Left(Trim(line), 10) = "Attribute " Then started = True
-        End If
-        If started Then
-            lineNum = lineNum + 1
-            cm.InsertLines lineNum, line
-        End If
-    Next
+    cm.AddFromString code
     errNum = Err.Number
     On Error GoTo 0
+
     If errNum <> 0 Then
         logFile.WriteLine "ERROR " & errNum
     Else
