@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	xlsmName   = "\u041a\u043d\u0438\u0433\u0430 1.xlsm"
+	xlsmName   = "\u041a\u043d\u0438\u0433\u04301.xlsm"
 	modulesDir = "modules"
 )
 
