@@ -134,7 +134,7 @@ Public Sub AssignSelectedColumns(role As Long)
     sheetRole = GetSheetRole(ws)
     
     If sheetRole = NilRole Then
-        MsgBox "Сначала назначьте лист", vbExclamation, "Подстановка"
+        MsgBox "РЎРЅР°С‡Р°Р»Р° РЅР°Р·РЅР°С‡СЊС‚Рµ Р»РёСЃС‚", vbExclamation, "РџРѕРґСЃС‚Р°РЅРѕРІРєР°"
         Exit Sub
     End If
     
@@ -158,11 +158,11 @@ Public Function ValidateSetup() As String
     ValidateSetup = ""
     
     If g_SheetSrc Is Nothing Then
-        ValidateSetup = "Назначьте лист-источник"
+        ValidateSetup = "РќР°Р·РЅР°С‡СЊС‚Рµ Р»РёСЃС‚-РёСЃС‚РѕС‡РЅРёРє"
         Exit Function
     End If
     If g_SheetDst Is Nothing Then
-        ValidateSetup = "Назначьте лист-приёмник"
+        ValidateSetup = "РќР°Р·РЅР°С‡СЊС‚Рµ Р»РёСЃС‚-РїСЂРёС‘РјРЅРёРє"
         Exit Function
     End If
     
@@ -172,7 +172,7 @@ Public Function ValidateSetup() As String
     Set KeyColsDst = GetKeyColumns(g_SheetDst)
     
     If KeyColsSrc.Count = 0 Or KeyColsDst.Count = 0 Then
-        ValidateSetup = "Колонки источника не выбраны"
+        ValidateSetup = "РљРѕР»РѕРЅРєРё РёСЃС‚РѕС‡РЅРёРєР° РЅРµ РІС‹Р±СЂР°РЅС‹"
         Exit Function
     End If
     
@@ -182,7 +182,7 @@ Public Function ValidateSetup() As String
     Set DataColsDst = GetDataColumns(g_SheetDst)
     
     If DataColsSrc.Count = 0 Or DataColsDst.Count = 0 Then
-        ValidateSetup = "Назначьте столбцы данных"
+        ValidateSetup = "РќР°Р·РЅР°С‡СЊС‚Рµ СЃС‚РѕР»Р±С†С‹ РґР°РЅРЅС‹С…"
         Exit Function
     End If
 End Function
@@ -256,21 +256,21 @@ Public Sub HandleDoubleClick(Sh As Object, ByVal Target As Range, Cancel As Bool
     
     Dim response As VbMsgBoxResult
     If sheetRole = SrcRole Then
-        response = MsgBox("Пометить как столбец-источник?", vbYesNoCancel + vbQuestion, "Подстановка")
+        response = MsgBox("РџРѕРјРµС‚РёС‚СЊ РєР°Рє СЃС‚РѕР»Р±РµС†-РёСЃС‚РѕС‡РЅРёРє?", vbYesNoCancel + vbQuestion, "РџРѕРґСЃС‚Р°РЅРѕРІРєР°")
         If response = vbYes Then
             ws.Cells(1, col).Interior.Color = ColorSrc
         ElseIf response = vbNo Then
-            response = MsgBox("Пометить как ключ?", vbYesNo + vbQuestion, "Подстановка")
+            response = MsgBox("РџРѕРјРµС‚РёС‚СЊ РєР°Рє РєР»СЋС‡?", vbYesNo + vbQuestion, "РџРѕРґСЃС‚Р°РЅРѕРІРєР°")
             If response = vbYes Then
                 ws.Cells(1, col).Interior.Color = ColorKey
             End If
         End If
     ElseIf sheetRole = DstRole Then
-        response = MsgBox("Пометить как столбец-получатель?", vbYesNoCancel + vbQuestion, "Подстановка")
+        response = MsgBox("РџРѕРјРµС‚РёС‚СЊ РєР°Рє СЃС‚РѕР»Р±РµС†-РїРѕР»СѓС‡Р°С‚РµР»СЊ?", vbYesNoCancel + vbQuestion, "РџРѕРґСЃС‚Р°РЅРѕРІРєР°")
         If response = vbYes Then
             ws.Cells(1, col).Interior.Color = ColorDst
         ElseIf response = vbNo Then
-            response = MsgBox("Пометить как ключ?", vbYesNo + vbQuestion, "Подстановка")
+            response = MsgBox("РџРѕРјРµС‚РёС‚СЊ РєР°Рє РєР»СЋС‡?", vbYesNo + vbQuestion, "РџРѕРґСЃС‚Р°РЅРѕРІРєР°")
             If response = vbYes Then
                 ws.Cells(1, col).Interior.Color = ColorKey
             End If

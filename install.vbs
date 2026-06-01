@@ -6,13 +6,17 @@ Set fso = CreateObject("Scripting.FileSystemObject")
 logPath = fso.GetParentFolderName(WScript.ScriptFullName) & "\install_log.txt"
 Set logFile = fso.CreateTextFile(logPath, True, True)
 
-Function ReadFileANSI(path)
-    Set f = fso.OpenTextFile(path, 1, False, 0)
-    ReadFileANSI = f.ReadAll
-    f.Close
+Function ReadUTF8(path)
+    Set stream = CreateObject("ADODB.Stream")
+    stream.Type = 2
+    stream.Charset = "utf-8"
+    stream.Open
+    stream.LoadFromFile path
+    ReadUTF8 = stream.ReadText
+    stream.Close
 End Function
 
-Function StripAttributes(code)
+Function StripBasHeader(code)
     lines = Split(code, vbCrLf)
     result = ""
     For i = 0 To UBound(lines)
@@ -21,7 +25,7 @@ Function StripAttributes(code)
             result = result & lines(i) & vbCrLf
         End If
     Next
-    StripAttributes = result
+    StripBasHeader = result
 End Function
 
 Function StripClsHeader(code)
@@ -78,8 +82,21 @@ For i = 0 To UBound(basFiles)
     If Not fso.FileExists(filePath) Then
         logFile.WriteLine "FILE NOT FOUND"
     Else
-        code = ReadFileANSI(filePath)
-        code = StripAttributes(code)
+        On Error Resume Next
+        code = ReadUTF8(filePath)
+        errNum = Err.Number
+        On Error GoTo 0
+
+        If errNum <> 0 Then
+            logFile.WriteLine "Read ERROR " & errNum & " - ADODB.Stream not found"
+            WScript.Echo "ERROR: ADODB.Stream not available. Run: regsvr32 msado15.dll"
+            logFile.Close
+            wb.Close False
+            excel.Quit
+            WScript.Quit 1
+        End If
+
+        code = StripBasHeader(code)
 
         modName = Replace(basFiles(i), ".bas", "")
         On Error Resume Next
@@ -103,7 +120,7 @@ Next
 clsPath = scriptDir & "\modules\AppEvents.cls"
 logFile.Write "Import AppEvents.cls: "
 If fso.FileExists(clsPath) Then
-    code = ReadFileANSI(clsPath)
+    code = ReadUTF8(clsPath)
     code = StripClsHeader(code)
 
     On Error Resume Next
@@ -128,7 +145,7 @@ End If
 twPath = scriptDir & "\modules\ThisWorkbook.cls"
 If fso.FileExists(twPath) Then
     logFile.Write "Update ThisWorkbook: "
-    code = ReadFileANSI(twPath)
+    code = ReadUTF8(twPath)
     code = StripClsHeader(code)
 
     On Error Resume Next

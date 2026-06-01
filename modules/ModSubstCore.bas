@@ -68,7 +68,7 @@ Public Sub DoReplace(mode As Long)
     Dim err As String
     err = ValidateSetup()
     If err <> "" Then
-        MsgBox err, vbExclamation, "�����������"
+        MsgBox err, vbExclamation, "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ"
         Exit Sub
     End If
     
@@ -148,11 +148,11 @@ Public Sub DoReplace(mode As Long)
     Application.EnableEvents = True
     
     Dim msg As String
-    msg = "�������� �����: " & changedCount
+    msg = "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ: " & changedCount
     If addedCount > 0 Then
-        msg = msg & "��������� �����: " & addedCount
+        msg = msg & "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ: " & addedCount
     End If
-    MsgBox msg, vbInformation, "�����������"
+    MsgBox msg, vbInformation, "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ"
 End Sub
 
 Private Function IsSourceEmpty(val As Variant) As Boolean
