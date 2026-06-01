@@ -68,7 +68,7 @@ Public Sub DoReplace(mode As Long)
     Dim err As String
     err = ValidateSetup()
     If err <> "" Then
-        MsgBox err, vbExclamation, "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ"
+        MsgBox err, vbExclamation, Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029)
         Exit Sub
     End If
     
@@ -148,11 +148,11 @@ Public Sub DoReplace(mode As Long)
     Application.EnableEvents = True
     
     Dim msg As String
-    msg = "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ: " & changedCount
+    msg = Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & " " & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & ": " & changedCount
     If addedCount > 0 Then
-        msg = msg & "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ: " & addedCount
+        msg = msg & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & " " & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & ": " & addedCount
     End If
-    MsgBox msg, vbInformation, "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ"
+    MsgBox msg, vbInformation, Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029)
 End Sub
 
 Private Function IsSourceEmpty(val As Variant) As Boolean

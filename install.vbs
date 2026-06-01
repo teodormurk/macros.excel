@@ -6,46 +6,6 @@ Set fso = CreateObject("Scripting.FileSystemObject")
 logPath = fso.GetParentFolderName(WScript.ScriptFullName) & "\install_log.txt"
 Set logFile = fso.CreateTextFile(logPath, True, True)
 
-Function ReadUTF8(path)
-    Set stream = CreateObject("ADODB.Stream")
-    stream.Type = 2
-    stream.Charset = "utf-8"
-    stream.Open
-    stream.LoadFromFile path
-    ReadUTF8 = stream.ReadText
-    stream.Close
-End Function
-
-Function StripBasHeader(code)
-    lines = Split(code, vbCrLf)
-    result = ""
-    For li = 0 To UBound(lines)
-        line = Trim(lines(li))
-        If Left(line, 10) <> "Attribute " And Left(line, 7) <> "VERSION " And line <> "BEGIN" And line <> "END" Then
-            result = result & lines(li) & vbCrLf
-        End If
-    Next
-    StripBasHeader = result
-End Function
-
-Function StripClsHeader(code)
-    lines = Split(code, vbCrLf)
-    result = ""
-    started = False
-    For li = 0 To UBound(lines)
-        line = Trim(lines(li))
-        If Not started Then
-            If Left(line, 7) = "Option " Or Left(line, 7) = "Private " Or Left(line, 7) = "Public " Then
-                started = True
-            End If
-        End If
-        If started Then
-            result = result & lines(li) & vbCrLf
-        End If
-    Next
-    StripClsHeader = result
-End Function
-
 logFile.WriteLine "=== Install Log ==="
 
 Set wb = excel.Workbooks.Open(excel.GetOpenFilename("Excel Files (*.xlsm),*.xlsm", , "Open workbook"))
@@ -82,37 +42,18 @@ For i = 0 To UBound(basFiles)
     If Not fso.FileExists(filePath) Then
         logFile.WriteLine "FILE NOT FOUND"
     Else
-        On Error Resume Next
-        code = ReadUTF8(filePath)
-        errNum = Err.Number
-        On Error GoTo 0
-
-        If errNum <> 0 Then
-            logFile.WriteLine "Read ERROR " & errNum & " - ADODB.Stream not found"
-            WScript.Echo "ERROR: ADODB.Stream not available. Run: regsvr32 msado15.dll"
-            logFile.Close
-            wb.Close False
-            excel.Quit
-            WScript.Quit 1
-        End If
-
-        code = StripBasHeader(code)
-
         modName = Replace(basFiles(i), ".bas", "")
         On Error Resume Next
         vb.VBComponents.Remove vb.VBComponents(modName)
         Err.Clear
-
-        Set comp = vb.VBComponents.Add(1)
-        comp.Name = modName
-        comp.CodeModule.AddFromString code
+        vb.VBComponents.Import filePath
         errNum = Err.Number
         On Error GoTo 0
 
         If errNum <> 0 Then
             logFile.WriteLine "ERROR " & errNum
         Else
-            logFile.WriteLine "OK (lines=" & comp.CodeModule.CountOfLines & ")"
+            logFile.WriteLine "OK"
         End If
     End If
 Next
@@ -120,23 +61,16 @@ Next
 clsPath = scriptDir & "\modules\AppEvents.cls"
 logFile.Write "Import AppEvents.cls: "
 If fso.FileExists(clsPath) Then
-    code = ReadUTF8(clsPath)
-    code = StripClsHeader(code)
-
     On Error Resume Next
     vb.VBComponents.Remove vb.VBComponents("AppEvents")
     Err.Clear
-
-    Set cls2 = vb.VBComponents.Add(2)
-    cls2.Name = "AppEvents"
-    cls2.CodeModule.AddFromString code
+    vb.VBComponents.Import clsPath
     errNum = Err.Number
     On Error GoTo 0
-
     If errNum <> 0 Then
         logFile.WriteLine "ERROR " & errNum
     Else
-        logFile.WriteLine "OK (lines=" & cls2.CodeModule.CountOfLines & ")"
+        logFile.WriteLine "OK"
     End If
 Else
     logFile.WriteLine "FILE NOT FOUND"
@@ -145,17 +79,26 @@ End If
 twPath = scriptDir & "\modules\ThisWorkbook.cls"
 If fso.FileExists(twPath) Then
     logFile.Write "Update ThisWorkbook: "
-    code = ReadUTF8(twPath)
-    code = StripClsHeader(code)
-
     On Error Resume Next
     Set cm = vb.VBComponents("ThisWorkbook").CodeModule
     cm.DeleteLines 1, cm.CountOfLines
     Err.Clear
-    cm.AddFromString code
+    Set f = fso.OpenTextFile(twPath, 1)
+    started = False
+    lineNum = 0
+    Do While Not f.AtEndOfStream
+        line = f.ReadLine
+        If Not started Then
+            If Left(Trim(line), 10) = "Attribute " Then started = True
+        End If
+        If started Then
+            lineNum = lineNum + 1
+            cm.InsertLines lineNum, line
+        End If
+    Loop
+    f.Close
     errNum = Err.Number
     On Error GoTo 0
-
     If errNum <> 0 Then
         logFile.WriteLine "ERROR " & errNum
     Else

@@ -134,7 +134,7 @@ Public Sub AssignSelectedColumns(role As Long)
     sheetRole = GetSheetRole(ws)
     
     If sheetRole = NilRole Then
-        MsgBox "Сначала назначьте лист", vbExclamation, "Подстановка"
+        MsgBox Chr(1057) & Chr(1085) & Chr(1072) & Chr(1095) & Chr(1072) & Chr(1083) & Chr(1072) & " " & Chr(1085) & Chr(1072) & Chr(1079) & Chr(1085) & Chr(1072) & Chr(1095) & Chr(1100) & Chr(1090) & Chr(1077) & " " & Chr(1083) & Chr(1080) & Chr(1089) & Chr(1090), vbExclamation, Chr(1055) & Chr(1086) & Chr(1076) & Chr(1089) & Chr(1090) & Chr(1072) & Chr(1085) & Chr(1086) & Chr(1074) & Chr(1082) & Chr(1072)
         Exit Sub
     End If
     
@@ -158,11 +158,11 @@ Public Function ValidateSetup() As String
     ValidateSetup = ""
     
     If g_SheetSrc Is Nothing Then
-        ValidateSetup = "Назначьте лист-источник"
+        ValidateSetup = Chr(1053) & Chr(1072) & Chr(1079) & Chr(1085) & Chr(1072) & Chr(1095) & Chr(1100) & Chr(1090) & Chr(1077) & " " & Chr(1083) & Chr(1080) & Chr(1089) & Chr(1090) & "-" & Chr(1080) & Chr(1089) & Chr(1090) & Chr(1086) & Chr(1095) & Chr(1085) & Chr(1080) & Chr(1082)
         Exit Function
     End If
     If g_SheetDst Is Nothing Then
-        ValidateSetup = "Назначьте лист-приёмник"
+        ValidateSetup = Chr(1053) & Chr(1072) & Chr(1079) & Chr(1085) & Chr(1072) & Chr(1095) & Chr(1100) & Chr(1090) & Chr(1077) & " " & Chr(1083) & Chr(1080) & Chr(1089) & Chr(1090) & "-" & Chr(1087) & Chr(1088) & Chr(1080) & Chr(1105) & Chr(1084) & Chr(1085) & Chr(1080) & Chr(1082)
         Exit Function
     End If
     
@@ -172,7 +172,7 @@ Public Function ValidateSetup() As String
     Set KeyColsDst = GetKeyColumns(g_SheetDst)
     
     If KeyColsSrc.Count = 0 Or KeyColsDst.Count = 0 Then
-        ValidateSetup = "Колонки источника не выбраны"
+        ValidateSetup = Chr(1050) & Chr(1086) & Chr(1083) & Chr(1086) & Chr(1085) & Chr(1082) & Chr(1080) & " " & Chr(1080) & Chr(1089) & Chr(1090) & Chr(1086) & Chr(1095) & Chr(1085) & Chr(1080) & Chr(1082) & Chr(1072) & " " & Chr(1085) & Chr(1077) & " " & Chr(1074) & Chr(1099) & Chr(1073) & Chr(1088) & Chr(1072) & Chr(1085) & Chr(1099)
         Exit Function
     End If
     
@@ -182,7 +182,7 @@ Public Function ValidateSetup() As String
     Set DataColsDst = GetDataColumns(g_SheetDst)
     
     If DataColsSrc.Count = 0 Or DataColsDst.Count = 0 Then
-        ValidateSetup = "Назначьте столбцы данных"
+        ValidateSetup = Chr(1053) & Chr(1072) & Chr(1079) & Chr(1085) & Chr(1072) & Chr(1095) & Chr(1100) & Chr(1090) & Chr(1077) & " " & Chr(1089) & Chr(1090) & Chr(1086) & Chr(1083) & Chr(1073) & Chr(1094) & Chr(1099) & " " & Chr(1076) & Chr(1072) & Chr(1085) & Chr(1085) & Chr(1099) & Chr(1093)
         Exit Function
     End If
 End Function
@@ -256,21 +256,21 @@ Public Sub HandleDoubleClick(Sh As Object, ByVal Target As Range, Cancel As Bool
     
     Dim response As VbMsgBoxResult
     If sheetRole = SrcRole Then
-        response = MsgBox("Пометить как столбец-источник?", vbYesNoCancel + vbQuestion, "Подстановка")
+        response = MsgBox(Chr(1055) & Chr(1086) & Chr(1084) & Chr(1077) & Chr(1090) & Chr(1080) & Chr(1090) & Chr(1100) & " " & Chr(1082) & Chr(1072) & Chr(1082) & " " & Chr(1089) & Chr(1090) & Chr(1086) & Chr(1083) & Chr(1073) & Chr(1077) & Chr(1094) & "-" & Chr(1080) & Chr(1089) & Chr(1090) & Chr(1086) & Chr(1095) & Chr(1085) & Chr(1080) & Chr(1082) & "?", vbYesNoCancel + vbQuestion, Chr(1055) & Chr(1086) & Chr(1076) & Chr(1089) & Chr(1090) & Chr(1072) & Chr(1085) & Chr(1086) & Chr(1074) & Chr(1082) & Chr(1072))
         If response = vbYes Then
             ws.Cells(1, col).Interior.Color = ColorSrc
         ElseIf response = vbNo Then
-            response = MsgBox("Пометить как ключ?", vbYesNo + vbQuestion, "Подстановка")
+            response = MsgBox(Chr(1055) & Chr(1086) & Chr(1084) & Chr(1077) & Chr(1090) & Chr(1080) & Chr(1090) & Chr(1100) & " " & Chr(1082) & Chr(1072) & Chr(1082) & " " & Chr(1082) & Chr(1083) & Chr(1102) & Chr(1095) & "?", vbYesNo + vbQuestion, Chr(1055) & Chr(1086) & Chr(1076) & Chr(1089) & Chr(1090) & Chr(1072) & Chr(1085) & Chr(1086) & Chr(1074) & Chr(1082) & Chr(1072))
             If response = vbYes Then
                 ws.Cells(1, col).Interior.Color = ColorKey
             End If
         End If
     ElseIf sheetRole = DstRole Then
-        response = MsgBox("Пометить как столбец-получатель?", vbYesNoCancel + vbQuestion, "Подстановка")
+        response = MsgBox(Chr(1055) & Chr(1086) & Chr(1084) & Chr(1077) & Chr(1090) & Chr(1080) & Chr(1090) & Chr(1100) & " " & Chr(1082) & Chr(1072) & Chr(1082) & " " & Chr(1089) & Chr(1090) & Chr(1086) & Chr(1083) & Chr(1073) & Chr(1077) & Chr(1094) & "-" & Chr(1087) & Chr(1086) & Chr(1083) & Chr(1091) & Chr(1095) & Chr(1072) & Chr(1090) & Chr(1077) & Chr(1083) & Chr(1100) & "?", vbYesNoCancel + vbQuestion, Chr(1055) & Chr(1086) & Chr(1076) & Chr(1089) & Chr(1090) & Chr(1072) & Chr(1085) & Chr(1086) & Chr(1074) & Chr(1082) & Chr(1072))
         If response = vbYes Then
             ws.Cells(1, col).Interior.Color = ColorDst
         ElseIf response = vbNo Then
-            response = MsgBox("Пометить как ключ?", vbYesNo + vbQuestion, "Подстановка")
+            response = MsgBox(Chr(1055) & Chr(1086) & Chr(1084) & Chr(1077) & Chr(1090) & Chr(1080) & Chr(1090) & Chr(1100) & " " & Chr(1082) & Chr(1072) & Chr(1082) & " " & Chr(1082) & Chr(1083) & Chr(1102) & Chr(1095) & "?", vbYesNo + vbQuestion, Chr(1055) & Chr(1086) & Chr(1076) & Chr(1089) & Chr(1090) & Chr(1072) & Chr(1085) & Chr(1086) & Chr(1074) & Chr(1082) & Chr(1072))
             If response = vbYes Then
                 ws.Cells(1, col).Interior.Color = ColorKey
             End If
