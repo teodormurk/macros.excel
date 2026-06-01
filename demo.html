@@ -170,17 +170,17 @@ td.skip-text{font-size:11px;color:#999}
 <!-- rcAdd -->
 <div class="rc rc5">
 <h3>Добавить <span class="badge" style="background:#9b59b6">rcAdd</span></h3>
-<p class="desc">Заменить все + добавить отсутствующие строки из источника</p>
+<p class="desc">Только добавить отсутствующие строки из источника (существующие не трогать)</p>
 <table>
 <tr><th class="key-h">Артикул</th><th>Наименование</th><th>Цена</th><th>Кол-во</th></tr>
 <tr><td>А001</td><td>Товар А</td><td class="protected">=B1*2</td><td>5</td></tr>
-<tr><td>А002</td><td>Товар Б</td><td class="changed">200 <span class="arr">250</span></td><td class="changed">3 <span class="arr">—</span></td></tr>
-<tr><td>А003</td><td>Товар В <span class="arr">источн. пуст</span></td><td class="changed">150 <span class="arr">—</span></td><td>10 <span class="arr">источн. пуст</span></td></tr>
-<tr><td>А004</td><td>Товар Г</td><td class="changed">300 <span class="arr">280</span></td><td class="changed">2 <span class="arr">1</span></td></tr>
+<tr><td>А002</td><td>Товар Б</td><td>250</td><td class="empty-cell">—</td></tr>
+<tr><td>А003</td><td>Товар В</td><td class="empty-cell">—</td><td>10</td></tr>
+<tr><td>А004</td><td>Товар Г</td><td>280</td><td>1</td></tr>
 <tr><td>А006</td><td>Товар Е <span class="arr">нет в источн.</span></td><td>600</td><td class="empty-cell">—</td></tr>
 <tr class="added"><td>А005</td><td class="empty-cell">—</td><td>400</td><td class="empty-cell">—</td></tr>
 </table>
-<div class="note"><b>А005</b> добавлена из источника (ключ отсутствовал в получателе). Пустые ячейки в источнике копируются как пустые. <b>А006</b> не удаляется — она только в получателе.</div>
+<div class="note"><b>А005</b> добавлена из источника (ключ отсутствовал в получателе). Существующие строки <b>не изменяются</b>. <b>А006</b> не удаляется.</div>
 </div>
 
 <!-- rcSum -->
@@ -222,21 +222,21 @@ td.skip-text{font-size:11px;color:#999}
 <th style="background:#e74c3c;color:#fff">rcSum</th>
 </tr>
 
-<tr><td rowspan="4" class="key-h">А001</td><td>Имя</td><td>Товар А</td><td>Товар А</td><td>текст</td><td>=</td><td>=</td><td>skip</td><td>skip</td><td>=</td><td>skip</td></tr>
+<tr><td rowspan="3" class="key-h">А001</td><td>Имя</td><td>Товар А</td><td>Товар А</td><td>текст</td><td>=</td><td>=</td><td>skip</td><td>skip</td><td>=</td><td>skip</td></tr>
 <tr><td>Цена</td><td>100</td><td class="formula">=B1*2</td><td>формула</td><td class="protected">locked</td><td class="protected">locked</td><td class="protected">locked</td><td class="protected">locked</td><td class="protected">locked</td><td class="protected">locked</td></tr>
 <tr><td>Кол-во</td><td>5</td><td>5</td><td>число</td><td>=</td><td>=</td><td>=</td><td>=</td><td>=</td><td>10</td></tr>
 
-<tr><td rowspan="4" class="key-h">А002</td><td>Имя</td><td>Товар Б</td><td>Товар Б</td><td>текст</td><td>=</td><td>=</td><td>skip</td><td>skip</td><td>=</td><td>skip</td></tr>
-<tr><td>Цена</td><td>200</td><td>250</td><td>число</td><td class="changed">200</td><td>=</td><td class="changed">200</td><td>=</td><td class="changed">200</td><td class="changed">450</td></tr>
-<tr><td>Кол-во</td><td>3</td><td class="empty-cell">—</td><td>пустая</td><td class="changed">3</td><td class="changed">3</td><td class="changed">3</td><td class="changed">3</td><td class="changed">3</td><td class="changed">3</td></tr>
+<tr><td rowspan="3" class="key-h">А002</td><td>Имя</td><td>Товар Б</td><td>Товар Б</td><td>текст</td><td>=</td><td>=</td><td>skip</td><td>skip</td><td>=</td><td>skip</td></tr>
+<tr><td>Цена</td><td>200</td><td>250</td><td>число</td><td class="changed">200</td><td>=</td><td class="changed">200</td><td>=</td><td>=</td><td class="changed">450</td></tr>
+<tr><td>Кол-во</td><td>3</td><td class="empty-cell">—</td><td>пустая</td><td class="changed">3</td><td class="changed">3</td><td class="changed">3</td><td class="changed">3</td><td>=</td><td class="changed">3</td></tr>
 
-<tr><td rowspan="4" class="key-h">А003</td><td>Имя</td><td class="empty-cell">—</td><td>Товар В</td><td>пустой ист.</td><td>skip</td><td>skip</td><td>skip</td><td>skip</td><td>skip</td><td>skip</td></tr>
-<tr><td>Цена</td><td>150</td><td class="empty-cell">—</td><td>пустая</td><td class="changed">150</td><td class="changed">150</td><td class="changed">150</td><td class="changed">150</td><td class="changed">150</td><td class="changed">150</td></tr>
+<tr><td rowspan="3" class="key-h">А003</td><td>Имя</td><td class="empty-cell">—</td><td>Товар В</td><td>пустой ист.</td><td>skip</td><td>skip</td><td>skip</td><td>skip</td><td>skip</td><td>skip</td></tr>
+<tr><td>Цена</td><td>150</td><td class="empty-cell">—</td><td>пустая</td><td class="changed">150</td><td class="changed">150</td><td class="changed">150</td><td class="changed">150</td><td>=</td><td class="changed">150</td></tr>
 <tr><td>Кол-во</td><td class="empty-cell">—</td><td>10</td><td>пустой ист.</td><td>skip</td><td>=</td><td>skip</td><td>skip</td><td>skip</td><td>skip</td></tr>
 
-<tr><td rowspan="4" class="key-h">А004</td><td>Имя</td><td>Товар Г</td><td>Товар Г</td><td>текст</td><td>=</td><td>=</td><td>skip</td><td>skip</td><td>=</td><td>skip</td></tr>
-<tr><td>Цена</td><td>300</td><td>280</td><td>число</td><td class="changed">300</td><td>=</td><td>=</td><td class="changed">300</td><td class="changed">300</td><td class="changed">580</td></tr>
-<tr><td>Кол-во</td><td>2</td><td>1</td><td>число</td><td class="changed">2</td><td>=</td><td>=</td><td class="changed">2</td><td class="changed">2</td><td class="changed">3</td></tr>
+<tr><td rowspan="3" class="key-h">А004</td><td>Имя</td><td>Товар Г</td><td>Товар Г</td><td>текст</td><td>=</td><td>=</td><td>skip</td><td>skip</td><td>=</td><td>skip</td></tr>
+<tr><td>Цена</td><td>300</td><td>280</td><td>число</td><td class="changed">300</td><td>=</td><td>=</td><td class="changed">300</td><td>=</td><td class="changed">580</td></tr>
+<tr><td>Кол-во</td><td>2</td><td>1</td><td>число</td><td class="changed">2</td><td>=</td><td>=</td><td class="changed">2</td><td>=</td><td class="changed">3</td></tr>
 
 <tr><td rowspan="3" class="key-h">А006</td><td>Имя</td><td class="empty-cell">нет</td><td>Товар Е</td><td>нет в ист.</td><td>skip</td><td>skip</td><td>skip</td><td>skip</td><td>skip</td><td>skip</td></tr>
 <tr><td>Цена</td><td class="empty-cell">—</td><td>600</td><td>нет в ист.</td><td>skip</td><td>skip</td><td>skip</td><td>skip</td><td>skip</td><td>skip</td></tr>

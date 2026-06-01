@@ -72,7 +72,7 @@ Public Sub DoReplace(mode As Long)
     Dim err As String
     err = ValidateSetup()
     If err <> "" Then
-        MsgBox err, vbExclamation, "Подстановка"
+        MsgBox err, vbExclamation, "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ"
         Exit Sub
     End If
     
@@ -152,11 +152,11 @@ Public Sub DoReplace(mode As Long)
     Application.EnableEvents = True
     
     Dim msg As String
-    msg = "Изменено ячеек: " & changedCount
+    msg = "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ: " & changedCount
     If addedCount > 0 Then
-        msg = msg & "Добавлено строк: " & addedCount
+        msg = msg & "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ: " & addedCount
     End If
-    MsgBox msg, vbInformation, "Подстановка"
+    MsgBox msg, vbInformation, "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ"
 End Sub
 
 Private Function IsSourceEmpty(val As Variant) As Boolean
@@ -221,7 +221,7 @@ Private Function ApplyReplace(srcVal As Variant, dstVal As Variant, mode As Long
             End If
             
         Case rcAdd
-            ApplyReplace = srcVal
+            ApplyReplace = Null
     End Select
 End Function
 
