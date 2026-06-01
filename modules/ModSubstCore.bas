@@ -16,7 +16,7 @@ Public Const rcSum = 5
 Public g_SheetSrc As Worksheet
 Public g_SheetDst As Worksheet
 Public g_Ribbon As IRibbonUI
-Public g_AppEvents As AppEvents
+Public g_AppEvents As Object
 
 Public Function NormalizeKey(ByVal Value As String) As String
     NormalizeKey = UCase(Replace(Trim(Value), " ", ""))
