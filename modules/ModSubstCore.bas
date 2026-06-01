@@ -13,10 +13,6 @@ Public Const rcMax = 3
 Public Const rcAdd = 4
 Public Const rcSum = 5
 
-Public g_SheetSrc As Worksheet
-Public g_SheetDst As Worksheet
-Public g_Ribbon As Object
-Public g_AppEvents As Object
 
 Public Function NormalizeKey(ByVal Value As String) As String
     NormalizeKey = UCase(Replace(Trim(Value), " ", ""))
