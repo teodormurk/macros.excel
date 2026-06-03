@@ -282,7 +282,7 @@ Public Sub DoCompare()
     Application.Calculation = xlCalculationAutomatic
     Application.EnableEvents = True
     Dim msg As String
-    msg = missingRows & " missing строк добавлено" & vbCrLf & _
+    msg = missingRows & " строк добавлено" & vbCrLf & _
           filledCells & " ячеек заполнено" & vbCrLf & _
           diffCells & " отличий отмечено"
     MsgBox msg, vbInformation, "Подстановка"
