@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Compare Mode Demo</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Tahoma,sans-serif;background:#f0f2f5;color:#222;padding:32px;max-width:1200px;margin:0 auto}
+h1{font-size:22px;margin-bottom:6px}
+.subtitle{color:#666;margin-bottom:28px;font-size:13px}
+
+.rules{background:#fff;border-radius:8px;padding:20px;margin-bottom:28px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.rules h2{font-size:15px;margin-bottom:12px;color:#333}
+.rules ul{list-style:none;padding:0}
+.rules li{padding:6px 0 6px 28px;position:relative;font-size:13px;color:#444;border-bottom:1px solid #f0f0f0}
+.rules li:last-child{border:none}
+.rules li::before{position:absolute;left:0;top:7px;width:18px;height:18px;border-radius:3px;text-align:center;font-size:11px;line-height:18px;font-weight:700}
+.r-red::before{background:#f8b2b2;color:#943126;content:"S"}
+.r-green::before{background:#b2dfb2;color:#2d6a2d;content:"+"}
+.r-yellow::before{background:#fdeb9e;color:#7a5a00;content:"!"}
+.r-orange::before{background:#fdc896;color:#7a3d00;content:"\u2192"}
+
+.section{margin-bottom:32px}
+.section h2{font-size:17px;margin-bottom:14px}
+.sheets{display:flex;gap:24px;flex-wrap:wrap}
+.sheet-card{background:#fff;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.08);padding:20px;min-width:380px;flex:1}
+.sheet-card h3{font-size:13px;color:#555;margin-bottom:10px;font-weight:600}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{border:1px solid #dde1e6;padding:7px 12px;text-align:center}
+th{font-weight:600;font-size:12px;white-space:nowrap}
+.key-h{background:#FFFFCC}
+.src-h{background:#CCFFCC}
+.dst-h{background:#FFCC99}
+
+.mark-red{background:#f8b2b2}
+.mark-green{background:#b2dfb2;font-weight:600}
+.mark-yellow{background:#fdeb9e}
+.mark-orange{background:#fdc896;font-weight:600}
+.empty-cell{color:#ccc}
+
+.arr{color:#e74c3c;font-size:10px;opacity:.7}
+.arr::before{content:" \2190 "}
+
+.legend{display:flex;gap:16px;margin-bottom:20px;flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:#555}
+.legend-c{width:20px;height:14px;border-radius:3px;border:1px solid rgba(0,0,0,.12)}
+.note{margin-top:10px;font-size:11px;color:#666;background:#f8f9fa;padding:8px 10px;border-radius:4px;line-height:1.6}
+.note b{color:#333}
+
+.flow{display:flex;gap:16px;align-items:stretch;margin-bottom:32px;flex-wrap:wrap}
+.flow-arrow{display:flex;align-items:center;font-size:28px;color:#aaa;font-weight:300;padding:0 4px}
+.flow-arrow span{font-size:11px;color:#999;display:block;text-align:center;line-height:1.3}
+
+.sheet-result{background:#fff;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.08);padding:20px;min-width:380px;flex:1}
+.sheet-result h3{font-size:13px;color:#555;margin-bottom:4px;font-weight:600}
+.sheet-result .tag{font-size:11px;color:#888;margin-bottom:10px}
+td.formula{background:#eef;font-style:italic;font-size:12px;color:#666}
+
+.summary{background:#fff;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.08);padding:20px;margin-bottom:28px}
+.summary h3{font-size:15px;margin-bottom:12px}
+.summary table{max-width:500px}
+.summary td{text-align:left;padding:6px 10px}
+.summary td:first-child{font-weight:600;white-space:nowrap;width:200px}
+</style>
+</head>
+<body>
+
+<h1>Compare Mode (rcCompare)</h1>
+<p class="subtitle">Fill empty + add missing rows, with color-coded marking of differences</p>
+
+<div class="legend">
+<div class="legend-item"><div class="legend-c" style="background:#f8b2b2"></div>RED &mdash; Source: missing in dest / dest was empty</div>
+<div class="legend-item"><div class="legend-c" style="background:#b2dfb2"></div>GREEN &mdash; Dest: new row added</div>
+<div class="legend-item"><div class="legend-c" style="background:#fdeb9e"></div>YELLOW &mdash; Dest: values differ</div>
+<div class="legend-item"><div class="legend-c" style="background:#fdc896"></div>ORANGE &mdash; Dest: empty cell filled from source</div>
+</div>
+
+<div class="rules">
+<h2>Compare Rules</h2>
+<ul>
+<li class="r-red"><b>Missing row</b> &mdash; key exists in Source but not in Dest: mark Source cells RED, add row to end of Dest with GREEN</li>
+<li class="r-orange"><b>Empty dest cell</b> &mdash; same key, Dest cell is empty: mark Source cell RED, fill Dest cell and mark ORANGE</li>
+<li class="r-yellow"><b>Different values</b> &mdash; same key, both have values but they differ: mark Dest cell YELLOW (no replacement)</li>
+<li class="r-green"><b>Same values</b> &mdash; no change, no marking</li>
+</ul>
+</div>
+
+<div class="section">
+<h2>Before: Initial Data</h2>
+<div class="sheets">
+<div class="sheet-card">
+<h3>Sheet 1 &mdash; Source</h3>
+<table>
+<tr><th class="key-h">Key</th><th class="src-h">Value</th></tr>
+<tr><td>A</td><td>100</td></tr>
+<tr><td>B</td><td>200</td></tr>
+<tr><td>C</td><td>300</td></tr>
+<tr><td>D</td><td>400</td></tr>
+<tr><td>E</td><td>500</td></tr>
+</table>
+</div>
+<div class="sheet-card">
+<h3>Sheet 2 &mdash; Destination (before)</h3>
+<table>
+<tr><th class="key-h">Key</th><th class="dst-h">Value</th></tr>
+<tr><td>A</td><td>100</td></tr>
+<tr><td>B</td><td>250</td></tr>
+<tr><td>C</td><td class="empty-cell">&mdash;</td></tr>
+<tr><td>F</td><td>600</td></tr>
+</table>
+<div class="note"><b>A</b> = same values &nbsp; <b>B</b> = dest has different value &nbsp; <b>C</b> = dest empty &nbsp; <b>D, E</b> = missing in dest &nbsp; <b>F</b> = only in dest</div>
+</div>
+</div>
+</div>
+
+<div class="section">
+<h2>After: Compare Result</h2>
+<div class="flow">
+
+<div class="sheet-result">
+<h3>Sheet 1 &mdash; Source (after)</h3>
+<div class="tag">Source sheet &mdash; only RED markings added</div>
+<table>
+<tr><th class="key-h">Key</th><th class="src-h">Value</th></tr>
+<tr><td>A</td><td>100</td></tr>
+<tr><td>B</td><td>200</td></tr>
+<tr><td class="mark-red">C</td><td class="mark-red">300 <span class="arr">dest empty</span></td></tr>
+<tr><td class="mark-red">D</td><td class="mark-red">400 <span class="arr">missing</span></td></tr>
+<tr><td class="mark-red">E</td><td class="mark-red">500 <span class="arr">missing</span></td></tr>
+</table>
+<div class="note"><b>C</b> &mdash; dest was empty, now filled (orange on dest). <b>D, E</b> &mdash; not found in dest, added to end (green on dest).</div>
+</div>
+
+<div class="flow-arrow">&rarr;</div>
+
+<div class="sheet-result">
+<h3>Sheet 2 &mdash; Destination (after)</h3>
+<div class="tag">Destination sheet &mdash; YELLOW / ORANGE / GREEN markings</div>
+<table>
+<tr><th class="key-h">Key</th><th class="dst-h">Value</th></tr>
+<tr><td>A</td><td>100</td></tr>
+<tr><td>B</td><td class="mark-yellow">250 <span class="arr">source=200</span></td></tr>
+<tr><td>C</td><td class="mark-orange">300 <span class="arr">filled</span></td></tr>
+<tr><td>F</td><td>600</td></tr>
+<tr class="mark-green"><td>D</td><td>400</td></tr>
+<tr class="mark-green"><td>E</td><td>500</td></tr>
+</table>
+<div class="note"><b>B</b> &mdash; YELLOW: source=200, dest=250, differs. <b>C</b> &mdash; ORANGE: was empty, filled from source. <b>D, E</b> &mdash; GREEN: new rows added. <b>F</b> &mdash; untouched (only in dest).</div>
+</div>
+
+</div>
+</div>
+
+<div class="section">
+<h2>Result Summary</h2>
+<div class="summary">
+<table>
+<tr><td>Missing rows added</td><td>2 <span style="color:#888">(D, E)</span></td></tr>
+<tr><td>Empty cells filled</td><td>1 <span style="color:#888">(C)</span></td></tr>
+<tr><td>Differing cells marked</td><td>1 <span style="color:#888">(B)</span></td></tr>
+<tr><td>Unchanged cells</td><td>1 <span style="color:#888">(A)</span></td></tr>
+<tr><td>Dest-only rows</td><td>1 <span style="color:#888">(F &mdash; ignored)</span></td></tr>
+</table>
+</div>
+</div>
+
+<div class="section">
+<h2>Decision Tree (per source row)</h2>
+<div class="sheet-card" style="min-width:auto">
+<table style="font-size:12px">
+<tr>
+<th style="background:#eee">Key</th>
+<th style="background:#eee">Found in Dest?</th>
+<th style="background:#eee">Dest Value</th>
+<th style="background:#eee">Source Cell</th>
+<th style="background:#eee">Dest Cell</th>
+</tr>
+<tr><td>A</td><td>yes</td><td>100 (same)</td><td>&mdash;</td><td>&mdash; (no change)</td></tr>
+<tr><td>B</td><td>yes</td><td>250 (diff)</td><td>&mdash;</td><td class="mark-yellow">YELLOW (250 stays)</td></tr>
+<tr><td>C</td><td>yes</td><td class="empty-cell">empty</td><td class="mark-red">RED</td><td class="mark-orange">ORANGE (filled with 300)</td></tr>
+<tr><td>D</td><td class="empty-cell">no</td><td class="empty-cell">&mdash;</td><td class="mark-red">RED</td><td class="mark-green">GREEN (row added)</td></tr>
+<tr><td>E</td><td class="empty-cell">no</td><td class="empty-cell">&mdash;</td><td class="mark-red">RED</td><td class="mark-green">GREEN (row added)</td></tr>
+<tr><td colspan="5" style="color:#999;font-style:italic">F exists only in Dest &mdash; not processed by source loop</td></tr>
+</table>
+</div>
+</div>
+
+</body>
+</html>
