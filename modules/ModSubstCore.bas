@@ -1,30 +1,17 @@
 Attribute VB_Name = "ModSubstCore"
 Option Explicit
 
-Public Const NilRole = 0
-Public Const SrcRole = 1
-Public Const DstRole = 2
-Public Const KeyRole = 3
-
-Public Const rcAll = 0
-Public Const rcEmpty = 1
-Public Const rcMin = 2
-Public Const rcMax = 3
-Public Const rcAdd = 4
-Public Const rcSum = 5
-
-
 Public Function NormalizeKey(ByVal Value As String) As String
     NormalizeKey = UCase(Replace(Trim(Value), " ", ""))
 End Function
 
-Public Function BuildCompositeKey(ws As Worksheet, keyCols As Collection, rowNum As Long) As String
+Public Function BuildCompositeKey(ws As Worksheet, KeyCols As Collection, rowNum As Long) As String
     Dim result As String
     Dim i As Long
     result = ""
-    For i = 1 To keyCols.Count
+    For i = 1 To KeyCols.Count
         Dim cellVal As String
-        cellVal = CStr(ws.Cells(rowNum, keyCols(i)).Value)
+        cellVal = CStr(ws.Cells(rowNum, KeyCols(i)).Value)
         If InStr(1, cellVal, "#", vbTextCompare) > 0 Then
             BuildCompositeKey = ""
             Exit Function
@@ -38,65 +25,53 @@ Public Function BuildIndex() As Object
     Dim index As Object
     Set index = CreateObject("Scripting.Dictionary")
     index.CompareMode = vbTextCompare
-    
-    Dim keyCols As Collection
-    Set keyCols = GetKeyColumns(g_SheetDst)
-    
-    If keyCols.Count = 0 Then
+    Dim KeyCols As Collection
+    Set KeyCols = GetKeyColumns(g_SheetDst)
+    If KeyCols.Count = 0 Then
         Set BuildIndex = index
         Exit Function
     End If
-    
     Dim lastRow As Long
     lastRow = LastUsedRow(g_SheetDst)
-    
     Dim r As Long
     For r = 2 To lastRow
         Dim compKey As String
-        compKey = BuildCompositeKey(g_SheetDst, keyCols, r)
+        compKey = BuildCompositeKey(g_SheetDst, KeyCols, r)
         If compKey <> "" Then
             If Not index.Exists(compKey) Then
                 index.Add compKey, r
             End If
         End If
     Next r
-    
     Set BuildIndex = index
 End Function
 
 Public Sub DoReplace(mode As Long)
     Dim errMsg As String
-    err = ValidateSetup()
-    If err <> "" Then
-        MsgBox err, vbExclamation, Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029)
+    errMsg = ValidateSetup()
+    If errMsg <> "" Then
+        MsgBox errMsg, vbExclamation, "Substitution"
         Exit Sub
     End If
-    
     Application.ScreenUpdating = False
     Application.Calculation = xlCalculationManual
     Application.EnableEvents = False
-    
     Dim KeyColsSrc As Collection
     Dim KeyColsDst As Collection
     Dim DataColsSrc As Collection
     Dim DataColsDst As Collection
-    
     Set KeyColsSrc = GetKeyColumns(g_SheetSrc)
     Set KeyColsDst = GetKeyColumns(g_SheetDst)
     Set DataColsSrc = GetDataColumns(g_SheetSrc)
     Set DataColsDst = GetDataColumns(g_SheetDst)
-    
     Dim index As Object
     Set index = BuildIndex()
-    
     Dim lastRowSrc As Long
     lastRowSrc = LastUsedRow(g_SheetSrc)
-    
     Dim changedCount As Long
     changedCount = 0
     Dim addedCount As Long
     addedCount = 0
-    
     Dim r As Long
     For r = 2 To lastRowSrc
         Dim compKey As String
@@ -105,10 +80,8 @@ Public Sub DoReplace(mode As Long)
             If index.Exists(compKey) Then
                 Dim dstRow As Long
                 dstRow = index(compKey)
-                
                 Dim dstKey As String
                 dstKey = BuildCompositeKey(g_SheetDst, KeyColsDst, dstRow)
-                
                 If compKey = dstKey Then
                     Dim i As Long
                     For i = 1 To DataColsSrc.Count
@@ -117,13 +90,11 @@ Public Sub DoReplace(mode As Long)
                             Dim dstCol As Long
                             srcCol = DataColsSrc(i)
                             dstCol = DataColsDst(i)
-                            
                             If Not g_SheetDst.Cells(dstRow, dstCol).HasFormula Then
                                 Dim srcVal As Variant
                                 Dim dstVal As Variant
                                 srcVal = g_SheetSrc.Cells(r, srcCol).Value
                                 dstVal = g_SheetDst.Cells(dstRow, dstCol).Value
-                                
                                 If Not IsSourceEmpty(srcVal) Then
                                     Dim result As Variant
                                     result = ApplyReplace(srcVal, dstVal, mode)
@@ -142,17 +113,15 @@ Public Sub DoReplace(mode As Long)
             End If
         End If
     Next r
-    
     Application.ScreenUpdating = True
     Application.Calculation = xlCalculationAutomatic
     Application.EnableEvents = True
-    
     Dim msg As String
-    msg = Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & " " & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & ": " & changedCount
+    msg = changedCount & " cells changed"
     If addedCount > 0 Then
-        msg = msg & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & " " & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & ": " & addedCount
+        msg = msg & vbCrLf & addedCount & " rows added"
     End If
-    MsgBox msg, vbInformation, Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029) & Chr(1087) & Chr(1111) & Chr(1029)
+    MsgBox msg, vbInformation, "Substitution"
 End Sub
 
 Private Function IsSourceEmpty(val As Variant) As Boolean
@@ -179,16 +148,11 @@ End Function
 
 Private Function ApplyReplace(srcVal As Variant, dstVal As Variant, mode As Long) As Variant
     ApplyReplace = Null
-    
     Select Case mode
         Case rcAll
             ApplyReplace = srcVal
-            
         Case rcEmpty
-            If IsDestEmpty(dstVal) Then
-                ApplyReplace = srcVal
-            End If
-            
+            If IsDestEmpty(dstVal) Then ApplyReplace = srcVal
         Case rcMin
             If IsNumeric(srcVal) Then
                 If IsDestEmpty(dstVal) Or Not IsNumeric(dstVal) Then
@@ -197,7 +161,6 @@ Private Function ApplyReplace(srcVal As Variant, dstVal As Variant, mode As Long
                     ApplyReplace = srcVal
                 End If
             End If
-            
         Case rcMax
             If IsNumeric(srcVal) Then
                 If IsDestEmpty(dstVal) Or Not IsNumeric(dstVal) Then
@@ -206,7 +169,6 @@ Private Function ApplyReplace(srcVal As Variant, dstVal As Variant, mode As Long
                     ApplyReplace = srcVal
                 End If
             End If
-            
         Case rcSum
             If IsNumeric(srcVal) Then
                 If IsDestEmpty(dstVal) Or Not IsNumeric(dstVal) Then
@@ -215,16 +177,14 @@ Private Function ApplyReplace(srcVal As Variant, dstVal As Variant, mode As Long
                     ApplyReplace = CDbl(srcVal) + CDbl(dstVal)
                 End If
             End If
-            
         Case rcAdd
-            ApplyReplace = Null
+            ApplyReplace = srcVal
     End Select
 End Function
 
 Private Sub AddRow(srcRow As Long, KeyColsSrc As Collection, KeyColsDst As Collection, DataColsSrc As Collection, DataColsDst As Collection)
     Dim lastRow As Long
     lastRow = LastUsedRow(g_SheetDst) + 1
-    
     Dim i As Long
     For i = 1 To KeyColsSrc.Count
         If i <= KeyColsDst.Count Then
@@ -232,7 +192,6 @@ Private Sub AddRow(srcRow As Long, KeyColsSrc As Collection, KeyColsDst As Colle
                 g_SheetSrc.Cells(srcRow, KeyColsSrc(i)).Value
         End If
     Next i
-    
     For i = 1 To DataColsSrc.Count
         If i <= DataColsDst.Count Then
             g_SheetDst.Cells(lastRow, DataColsDst(i)).Value = _
