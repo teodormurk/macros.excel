@@ -6,10 +6,10 @@ Public Const ColorDst As Long = 16764057
 Public Const ColorKey As Long = 16777164
 Public Const ColorNone As Long = -4142
 
-Public Const ColorMarkRed As Long = 11711224
-Public Const ColorMarkGreen As Long = 11733938
-Public Const ColorMarkYellow As Long = 10851797
-Public Const ColorMarkOrange As Long = 9911725
+Public Const ColorMarkRed As Long = 12695295
+Public Const ColorMarkGreen As Long = 9498256
+Public Const ColorMarkYellow As Long = 14745599
+Public Const ColorMarkOrange As Long = 12180223
 
 Public Function LastUsedRow(ws As Worksheet) As Long
     On Error Resume Next
