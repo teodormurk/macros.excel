@@ -1,2 +1,2 @@
-modules/*.bas text eol=crlf
-modules/*.cls text eol=crlf
+modules/*.bas binary
+modules/*.cls binary
