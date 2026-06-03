@@ -50,7 +50,7 @@ Public Sub DoReplace(mode As Long)
     Dim errMsg As String
     errMsg = ValidateSetup()
     If errMsg <> "" Then
-        MsgBox errMsg, vbExclamation, "Substitution"
+        MsgBox errMsg, vbExclamation, "Подстановка"
         Exit Sub
     End If
     Application.ScreenUpdating = False
@@ -117,11 +117,11 @@ Public Sub DoReplace(mode As Long)
     Application.Calculation = xlCalculationAutomatic
     Application.EnableEvents = True
     Dim msg As String
-    msg = changedCount & " cells changed"
+    msg = changedCount & " ячеек изменено"
     If addedCount > 0 Then
-        msg = msg & vbCrLf & addedCount & " rows added"
+        msg = msg & vbCrLf & addedCount & " строк добавлено"
     End If
-    MsgBox msg, vbInformation, "Substitution"
+    MsgBox msg, vbInformation, "Подстановка"
 End Sub
 
 Private Function IsSourceEmpty(val As Variant) As Boolean
@@ -204,7 +204,7 @@ Public Sub DoCompare()
     Dim errMsg As String
     errMsg = ValidateSetup()
     If errMsg <> "" Then
-        MsgBox errMsg, vbExclamation, "Substitution"
+        MsgBox errMsg, vbExclamation, "Подстановка"
         Exit Sub
     End If
     Application.ScreenUpdating = False
@@ -282,10 +282,10 @@ Public Sub DoCompare()
     Application.Calculation = xlCalculationAutomatic
     Application.EnableEvents = True
     Dim msg As String
-    msg = missingRows & " missing rows added" & vbCrLf & _
-          filledCells & " empty cells filled" & vbCrLf & _
-          diffCells & " differing cells marked"
-    MsgBox msg, vbInformation, "Substitution"
+    msg = missingRows & " missing строк добавлено" & vbCrLf & _
+          filledCells & " ячеек заполнено" & vbCrLf & _
+          diffCells & " отличий отмечено"
+    MsgBox msg, vbInformation, "Подстановка"
 End Sub
 
 Private Sub AddMarkedRow(srcRow As Long, KeyColsSrc As Collection, KeyColsDst As Collection, DataColsSrc As Collection, DataColsDst As Collection)

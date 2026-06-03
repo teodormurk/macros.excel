@@ -123,7 +123,7 @@ Public Sub AssignSelectedColumns(role As Long)
     Dim sheetRole As Long
     sheetRole = GetSheetRole(ws)
     If sheetRole = NilRole Then
-        MsgBox "Assign a sheet first", vbExclamation, "Substitution"
+        MsgBox "Сначала назначьте лист", vbExclamation, "Подстановка"
         Exit Sub
     End If
     Dim sel As Range
@@ -143,11 +143,11 @@ End Sub
 Public Function ValidateSetup() As String
     ValidateSetup = ""
     If g_SheetSrc Is Nothing Then
-        ValidateSetup = "Source sheet not assigned"
+        ValidateSetup = "Не назначен лист-источник"
         Exit Function
     End If
     If g_SheetDst Is Nothing Then
-        ValidateSetup = "Destination sheet not assigned"
+        ValidateSetup = "Не назначен лист-получатель"
         Exit Function
     End If
     Dim KeyColsSrc As Collection
@@ -155,7 +155,7 @@ Public Function ValidateSetup() As String
     Set KeyColsSrc = GetKeyColumns(g_SheetSrc)
     Set KeyColsDst = GetKeyColumns(g_SheetDst)
     If KeyColsSrc.Count = 0 Or KeyColsDst.Count = 0 Then
-        ValidateSetup = "Key columns not assigned"
+        ValidateSetup = "Не назначены ключевые столбцы"
         Exit Function
     End If
     Dim DataColsSrc As Collection
@@ -163,7 +163,7 @@ Public Function ValidateSetup() As String
     Set DataColsSrc = GetDataColumns(g_SheetSrc)
     Set DataColsDst = GetDataColumns(g_SheetDst)
     If DataColsSrc.Count = 0 Or DataColsDst.Count = 0 Then
-        ValidateSetup = "Data columns not assigned"
+        ValidateSetup = "Не назначены столбцы данных"
         Exit Function
     End If
 End Function
@@ -220,21 +220,21 @@ Public Sub HandleDoubleClick(Sh As Object, ByVal Target As Range, Cancel As Bool
     End If
     Dim response As VbMsgBoxResult
     If sheetRole = SrcRole Then
-        response = MsgBox("Mark as source column?", vbYesNoCancel + vbQuestion, "Substitution")
+        response = MsgBox("Пометить как столбец-источник?", vbYesNoCancel + vbQuestion, "Подстановка")
         If response = vbYes Then
             ws.Cells(1, col).Interior.Color = ColorSrc
         ElseIf response = vbNo Then
-            response = MsgBox("Mark as key?", vbYesNo + vbQuestion, "Substitution")
+            response = MsgBox("Пометить как ключ?", vbYesNo + vbQuestion, "Подстановка")
             If response = vbYes Then
                 ws.Cells(1, col).Interior.Color = ColorKey
             End If
         End If
     ElseIf sheetRole = DstRole Then
-        response = MsgBox("Mark as destination column?", vbYesNoCancel + vbQuestion, "Substitution")
+        response = MsgBox("Пометить как столбец-получатель?", vbYesNoCancel + vbQuestion, "Подстановка")
         If response = vbYes Then
             ws.Cells(1, col).Interior.Color = ColorDst
         ElseIf response = vbNo Then
-            response = MsgBox("Mark as key?", vbYesNo + vbQuestion, "Substitution")
+            response = MsgBox("Пометить как ключ?", vbYesNo + vbQuestion, "Подстановка")
             If response = vbYes Then
                 ws.Cells(1, col).Interior.Color = ColorKey
             End If
