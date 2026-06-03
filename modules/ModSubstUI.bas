@@ -14,7 +14,7 @@ Public Sub getEnabled(control As IRibbonControl, ByRef returnedVal)
             returnedVal = Not (g_SheetSrc Is Nothing And g_SheetDst Is Nothing)
         Case "btnColKey", "btnColSrc", "btnColDst"
             returnedVal = GetSheetRole(ActiveSheet) <> NilRole
-        Case "btnReplaceAll", "btnFillEmpty", "btnMinimize", "btnMaximize", "btnAddItems", "btnSumValues"
+        Case "btnReplaceAll", "btnFillEmpty", "btnMinimize", "btnMaximize", "btnAddItems", "btnSumValues", "btnCompare"
             returnedVal = Not (g_SheetSrc Is Nothing Or g_SheetDst Is Nothing)
     End Select
 End Sub
@@ -88,4 +88,8 @@ End Sub
 
 Public Sub btnSumValues_click(control As IRibbonControl)
     DoReplace rcSum
+End Sub
+
+Public Sub btnCompare_click(control As IRibbonControl)
+    DoCompare
 End Sub

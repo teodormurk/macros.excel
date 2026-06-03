@@ -12,6 +12,7 @@ Public Const rcMin = 2
 Public Const rcMax = 3
 Public Const rcAdd = 4
 Public Const rcSum = 5
+Public Const rcCompare = 6
 
 Public g_SheetSrc As Worksheet
 Public g_SheetDst As Worksheet
